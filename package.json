@@ -6,6 +6,24 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
+  "keywords": [
+    "aliexpress",
+    "aliexpress-crawler",
+    "aliexpress-spider",
+    "aliexpress-api",
+    "aliexpress-dropship",
+    "aliexpress-dropshipping",
+    "dropship",
+    "dropshipping",
+    "aliexpress-scraper",
+    "aliexpress-product-scraper",
+    "aliexpress-product-json",
+    "product-scraper",
+    "product-json",
+    "scraper",
+    "crawler",
+    "spider"
+  ],
   "author": "Sudheer Ranga",
   "license": "MIT",
   "dependencies": {
