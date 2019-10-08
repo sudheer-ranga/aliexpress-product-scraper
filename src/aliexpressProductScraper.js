@@ -4,7 +4,7 @@ const cheerio = require('cheerio');
 const Variants = require('./variants');
 const Feedback = require('./feedback');
 
-async function AliProductScraper(productId, feedbackLimit) {
+async function AliexpressProductScraper(productId, feedbackLimit) {
   const FEEDBACK_LIMIT = feedbackLimit || 10;
   const browser = await puppeteer.launch();
   const page = await browser.newPage();
@@ -82,4 +82,4 @@ async function AliProductScraper(productId, feedbackLimit) {
   return json;
 }
 
-module.exports = AliProductScraper;
+module.exports = AliexpressProductScraper;

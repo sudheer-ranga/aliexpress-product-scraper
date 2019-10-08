@@ -1,7 +1,7 @@
 const fs = require('fs');
 const productId = 32958933105;
-const AliProductScraper = require('./src/aliProduct');
-const product = AliProductScraper(productId);
+const scrape = require('./src/aliexpressProductScraper');
+const product = scrape(productId);
 
 product.then(res => {
   console.log('The JSON: ', res);
