@@ -66,8 +66,8 @@ async function AliexpressProductScraper(productId, feedbackLimit) {
       oneStarCount: data.titleModule.feedbackRating.oneStarNum
     },
     images:
-      (runParams.data.imageModule &&
-        runParams.data.imageModule.imagePathList) ||
+      (data.imageModule &&
+        data.imageModule.imagePathList) ||
       [],
     feedback: feedbackData,
     variants: Variants.get(data.skuModule),
