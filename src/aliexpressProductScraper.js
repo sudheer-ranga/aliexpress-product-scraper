@@ -2,9 +2,10 @@ const puppeteer = require('puppeteer');
 const cheerio = require('cheerio');
 
 const Variants = require('./variants');
+const Shipping = require('./shipping');
 const Feedback = require('./feedback');
 
-async function AliexpressProductScraper(productId, feedbackLimit) {
+async function AliexpressProductScraper(productId, feedbackLimit, shippingCountryNames = []) {
   const FEEDBACK_LIMIT = feedbackLimit || 10;
   const browser = await puppeteer.launch();
   const page = await browser.newPage();
@@ -14,6 +15,8 @@ async function AliexpressProductScraper(productId, feedbackLimit) {
   const aliExpressData = await page.evaluate(() => runParams);
 
   const data = aliExpressData.data;
+  const variants = Variants.get(data.skuModule);
+  const shipping = await Shipping.get(page, data, shippingCountryNames, variants);
 
   /** Scrape the description page for the product using the description url */
   const descriptionUrl = data.descriptionModule.descriptionUrl;
@@ -70,7 +73,8 @@ async function AliexpressProductScraper(productId, feedbackLimit) {
         data.imageModule.imagePathList) ||
       [],
     feedback: feedbackData,
-    variants: Variants.get(data.skuModule),
+    variants: variants,
+    shipping: shipping,
     specs: data.specsModule.props,
     currency: data.webEnv.currency,
     originalPrice: {
