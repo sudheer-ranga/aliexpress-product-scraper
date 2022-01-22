@@ -29,7 +29,7 @@
   "dependencies": {
     "cheerio": "^1.0.0-rc.10",
     "faker": "^5.5.3",
-    "node-fetch": "^2.6.1",
+    "node-fetch": "^3.1.1",
     "puppeteer": "^10.0.0"
   }
 }
