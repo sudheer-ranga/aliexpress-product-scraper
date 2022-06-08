@@ -1,8 +1,12 @@
-const puppeteer = require('puppeteer');
-const cheerio = require('cheerio');
+const puppeteer = require("puppeteer-extra");
+const cheerio = require("cheerio");
 
-const Variants = require('./variants');
-const Feedback = require('./feedback');
+const Variants = require("./variants");
+const Feedback = require("./feedback");
+const Shipping = require("./shipping");
+
+const StealthPlugin = require("puppeteer-extra-plugin-stealth");
+puppeteer.use(StealthPlugin());
 
 async function AliexpressProductScraper(productId, feedbackLimit) {
   const FEEDBACK_LIMIT = feedbackLimit || 10;
@@ -14,6 +18,7 @@ async function AliexpressProductScraper(productId, feedbackLimit) {
   const aliExpressData = await page.evaluate(() => runParams);
 
   const data = aliExpressData.data;
+  const shipping = Shipping.getShippingData(data?.shippingModule);
 
   /** Scrape the description page for the product using the description url */
   const descriptionUrl = data.descriptionModule.descriptionUrl;
@@ -22,7 +27,7 @@ async function AliexpressProductScraper(productId, feedbackLimit) {
 
   /** Build the AST for the description page html content using cheerio */
   const $ = cheerio.load(descriptionPageHtml);
-  const descriptionData = $('body').html();
+  const descriptionData = $("body").html();
 
   /** Fetch the adminAccountId required to fetch the feedbacks */
   const adminAccountId = await page.evaluate(() => adminAccountId);
@@ -53,7 +58,7 @@ async function AliexpressProductScraper(productId, feedbackLimit) {
       storeNumber: data.storeModule.storeNum,
       followers: data.storeModule.followingNumber,
       ratingCount: data.storeModule.positiveNum,
-      rating: data.storeModule.positiveRate
+      rating: data.storeModule.positiveRate,
     },
     ratings: {
       totalStar: 5,
@@ -63,28 +68,26 @@ async function AliexpressProductScraper(productId, feedbackLimit) {
       fourStarCount: data.titleModule.feedbackRating.fourStarNum,
       threeStarCount: data.titleModule.feedbackRating.threeStarNum,
       twoStarCount: data.titleModule.feedbackRating.twoStarNum,
-      oneStarCount: data.titleModule.feedbackRating.oneStarNum
+      oneStarCount: data.titleModule.feedbackRating.oneStarNum,
     },
-    images:
-      (data.imageModule &&
-        data.imageModule.imagePathList) ||
-      [],
+    images: (data.imageModule && data.imageModule.imagePathList) || [],
     feedback: feedbackData,
     variants: Variants.get(data.skuModule),
     specs: data.specsModule.props,
     currency: data.webEnv.currency,
     originalPrice: {
       min: data.priceModule.minAmount.value,
-      max: data.priceModule.maxAmount.value
+      max: data.priceModule.maxAmount.value,
     },
     salePrice: {
-      min: data.priceModule.minActivityAmount 
-        ? data.priceModule.minActivityAmount.value 
+      min: data.priceModule.minActivityAmount
+        ? data.priceModule.minActivityAmount.value
         : data.priceModule.minAmount.value,
-      max: data.priceModule.maxActivityAmount 
-        ? data.priceModule.maxActivityAmount.value 
+      max: data.priceModule.maxActivityAmount
+        ? data.priceModule.maxActivityAmount.value
         : data.priceModule.maxAmount.value,
-    }
+    },
+    shipping,
   };
 
   return json;
