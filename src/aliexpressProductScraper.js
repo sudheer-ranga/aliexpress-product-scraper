@@ -18,10 +18,12 @@ async function AliexpressProductScraper(productId, feedbackLimit) {
   const aliExpressData = await page.evaluate(() => runParams);
 
   const data = aliExpressData.data;
-  const shipping = Shipping.getShippingData(data?.shippingModule);
+  const shipping = Shipping.getShippingData(
+    data.webGeneralFreightCalculateComponent
+  );
 
   /** Scrape the description page for the product using the description url */
-  const descriptionUrl = data.descriptionModule.descriptionUrl;
+  const descriptionUrl = data.productDescComponent.descriptionUrl;
   await page.goto(descriptionUrl);
   const descriptionPageHtml = await page.content();
 
@@ -35,57 +37,57 @@ async function AliexpressProductScraper(productId, feedbackLimit) {
 
   let feedbackData = [];
 
-  if (data.titleModule.feedbackRating.totalValidNum > 0) {
+  if (data.feedbackComponent.totalValidNum > 0) {
     feedbackData = await Feedback.get(
-      data.actionModule.productId,
+      data.productInfoComponent.id,
       adminAccountId,
-      data.titleModule.feedbackRating.totalValidNum,
+      data.feedbackComponent.totalValidNum,
       FEEDBACK_LIMIT
     );
   }
 
   /** Build the JSON response with aliexpress product details */
   const json = {
-    title: data.titleModule.subject,
-    categoryId: data.actionModule.categoryId,
-    productId: data.actionModule.productId,
-    totalAvailableQuantity: data.quantityModule.totalAvailQuantity,
+    title: data.productInfoComponent.subject,
+    categoryId: data.productInfoComponent.categoryId,
+    productId: data.productInfoComponent.id,
+    totalAvailableQuantity: data.inventoryComponent.totalAvailQuantity,
     description: descriptionData,
-    orders: data.titleModule.tradeCount,
+    orders: data.tradeComponent.formatTradeCount,
     storeInfo: {
-      name: data.storeModule.storeName,
-      companyId: data.storeModule.companyId,
-      storeNumber: data.storeModule.storeNum,
-      followers: data.storeModule.followingNumber,
-      ratingCount: data.storeModule.positiveNum,
-      rating: data.storeModule.positiveRate,
+      name: data.sellerComponent.storeName,
+      companyId: data.sellerComponent.companyId,
+      storeNumber: data.sellerComponent.storeNum,
+      followers: NaN,
+      ratingCount: data.storeFeedbackComponent.sellerPositiveNum,
+      rating: data.storeFeedbackComponent.sellerPositiveRate,
     },
     ratings: {
       totalStar: 5,
-      averageStar: data.titleModule.feedbackRating.averageStar,
-      totalStartCount: data.titleModule.feedbackRating.totalValidNum,
-      fiveStarCount: data.titleModule.feedbackRating.fiveStarNum,
-      fourStarCount: data.titleModule.feedbackRating.fourStarNum,
-      threeStarCount: data.titleModule.feedbackRating.threeStarNum,
-      twoStarCount: data.titleModule.feedbackRating.twoStarNum,
-      oneStarCount: data.titleModule.feedbackRating.oneStarNum,
+      averageStar: data.feedbackComponent.evarageStar,
+      totalStartCount: data.feedbackComponent.totalValidNum,
+      fiveStarCount: data.feedbackComponent.fiveStarNum,
+      fourStarCount: data.feedbackComponent.fourStarNum,
+      threeStarCount: data.feedbackComponent.threeStarNum,
+      twoStarCount: data.feedbackComponent.twoStarNum,
+      oneStarCount: data.feedbackComponent.oneStarNum,
     },
-    images: (data.imageModule && data.imageModule.imagePathList) || [],
+    images: (data.imageComponent && data.imageComponent.imagePathList) || [],
     feedback: feedbackData,
-    variants: Variants.get(data.skuModule),
-    specs: data.specsModule.props,
-    currency: data.webEnv.currency,
+    variants: Variants.get(data.priceComponent, data.skuComponent),
+    specs: data.productPropComponent.props,
+    currency: data.currencyComponent.currencyCode,
     originalPrice: {
-      min: data.priceModule.minAmount.value,
-      max: data.priceModule.maxAmount.value,
+      min: data.priceComponent.origPrice.minAmount.value,
+      max: data.priceComponent.origPrice.maxAmount.value,
     },
     salePrice: {
-      min: data.priceModule.minActivityAmount
-        ? data.priceModule.minActivityAmount.value
-        : data.priceModule.minAmount.value,
-      max: data.priceModule.maxActivityAmount
-        ? data.priceModule.maxActivityAmount.value
-        : data.priceModule.maxAmount.value,
+      min: data.priceComponent.discountPrice.minActivityAmount
+        ? data.priceComponent.discountPrice.minActivityAmount.value
+        : data.priceComponent.origPrice.minAmount.value,
+      max: data.priceComponent.discountPrice.maxActivityAmount
+        ? data.priceComponent.discountPrice.maxActivityAmount.value
+        : data.priceComponent.origPrice.maxAmount.value,
     },
     shipping,
   };

@@ -1,6 +1,6 @@
-const scrape = require('./../index.js');
-const product = scrape('32958933105');
+const scrape = require("./../index.js");
+const product = scrape("2255800692211273");
 
-product.then(res => {
-  console.log('The JSON: ', res);
+product.then((res) => {
+  console.log("The JSON: ", res);
 });
