@@ -4,11 +4,7 @@ import * as cheerio from "cheerio";
 import { get as GetVariants } from "./variants.js";
 import { get as GetReviews } from "./reviews.js";
 
-const AliexpressProductScraper = async ({
-  productId,
-  reviewsCount,
-  rating,
-}) => {
+const AliexpressProductScraper = async ({ id, reviewsCount, rating }) => {
   const REVIEWS_COUNT = reviewsCount || 20;
   const browser = await puppeteer.launch({
     headless: "new",
@@ -16,7 +12,7 @@ const AliexpressProductScraper = async ({
   const page = await browser.newPage();
 
   /** Scrape the aliexpress product page for details */
-  await page.goto(`https://www.aliexpress.com/item/${productId}.html`);
+  await page.goto(`https://www.aliexpress.com/item/${id}.html`);
   const aliExpressData = await page.evaluate(() => runParams);
 
   const data = aliExpressData?.data;
@@ -39,7 +35,7 @@ const AliexpressProductScraper = async ({
   await browser.close();
 
   const reviews = await GetReviews({
-    productId,
+    productId: id,
     count: REVIEWS_COUNT,
     rating,
   });
