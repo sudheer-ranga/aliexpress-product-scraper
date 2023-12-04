@@ -18,16 +18,26 @@ npm i aliexpress-product-scraper
 ```
 import scrape from 'aliexpress-product-scraper';
 
-scrape({id: '1005005167379524'}).then(res => {
+scrape('1005005167379524', options).then(res => {
   console.log('Product JSON: ', res);
 });
 ```
 
-Initialiser takes 3 paramaters as of now
+Initialiser takes id as a string. It also takes options which are optional. Options are defined as below.
 
-1. `id` - `required` Aliexpress Product ID
-2. `reviewsCount` - `optional` - Defaults to 20 reviews
-3. `reviews` - `optional` - Fetches all reviews by default. Pass `1` `2` `3` `4` `5` to filter by specific reviews.
+`id` - Aliexpress Product ID
+
+Options
+
+```
+{
+  reviewsCount: 20,
+  filterReviewsBy: 'all' | 1 | 2 | 3 | 4 | 5,
+}
+```
+
+1. `reviewsCount` - Defaults to 20 reviews
+1. `filterReviewsBy` - Fetches `all` reviews by default. Pass `1` `2` `3` `4` `5` to filter by specific reviews. Support only 1 rating at once.
 
 # Sample JSON Response
 

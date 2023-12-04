@@ -1,7 +1,6 @@
 import scrape from "./../index.js";
 
-scrape({
-  id: "1005005167379524",
+scrape("1005005167379524", {
   reviewsCount: 20,
   rating: 2,
 })

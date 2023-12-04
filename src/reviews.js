@@ -24,7 +24,7 @@ const getReview = (review) => {
   return data;
 };
 
-const get = async ({ productId, total, limit, rating = "all" }) => {
+const get = async ({ productId, total, limit, filterReviewsBy = "all" }) => {
   let allReviews = [];
   const COUNT_PER_PAGE = 20;
 
@@ -40,7 +40,7 @@ const get = async ({ productId, total, limit, rating = "all" }) => {
   }
 
   for (let currentPage = 1; currentPage <= totalPages; currentPage++) {
-    const reviewUrl = `https://feedback.aliexpress.com/pc/searchEvaluation.do?productId=${productId}&page=${currentPage}&pageSize=${COUNT_PER_PAGE}&filter=${rating}`;
+    const reviewUrl = `https://feedback.aliexpress.com/pc/searchEvaluation.do?productId=${productId}&page=${currentPage}&pageSize=${COUNT_PER_PAGE}&filter=${filterReviewsBy}`;
     const review = await fetch(reviewUrl);
     const reviewJson = await review.json();
 

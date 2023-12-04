@@ -5,7 +5,14 @@ import { get as GetVariants } from "./variants.js";
 import { get as GetReviews } from "./reviews.js";
 import { get as GetShippingDetails } from "./shipping.js";
 
-const AliexpressProductScraper = async ({ id, reviewsCount, rating }) => {
+const AliexpressProductScraper = async (
+  id,
+  { reviewsCount, filterReviewsBy }
+) => {
+  if (!id) {
+    throw new Error("Please provide a valid product id");
+  }
+
   let browser;
 
   try {
@@ -43,7 +50,7 @@ const AliexpressProductScraper = async ({ id, reviewsCount, rating }) => {
       productId: id,
       limit: REVIEWS_COUNT,
       total: data.feedbackComponent.totalValidNum,
-      rating,
+      filterReviewsBy,
     });
 
     const [descriptionData, reviews] = await Promise.all([
