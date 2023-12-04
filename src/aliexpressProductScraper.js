@@ -3,6 +3,7 @@ import * as cheerio from "cheerio";
 
 import { get as GetVariants } from "./variants.js";
 import { get as GetReviews } from "./reviews.js";
+import { get as GetShippingDetails } from "./shipping.js";
 
 const AliexpressProductScraper = async ({ id, reviewsCount, rating }) => {
   const REVIEWS_COUNT = reviewsCount || 20;
@@ -19,6 +20,10 @@ const AliexpressProductScraper = async ({ id, reviewsCount, rating }) => {
   if (!data) {
     throw new Error("No data found");
   }
+
+  const shipping = GetShippingDetails(
+    data?.webGeneralFreightCalculateComponent?.originalLayoutResultList || []
+  );
 
   /** Scrape the description page for the product using the description url */
   const descriptionUrl = data?.productDescComponent?.descriptionUrl;
@@ -87,6 +92,7 @@ const AliexpressProductScraper = async ({ id, reviewsCount, rating }) => {
       min: data.priceComponent.discountPrice.minActivityAmount,
       max: data.priceComponent.discountPrice.maxActivityAmount,
     },
+    shipping,
   };
 
   return json;
