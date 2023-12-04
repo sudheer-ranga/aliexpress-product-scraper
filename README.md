@@ -33,11 +33,13 @@ Options
 {
   reviewsCount: 20,
   filterReviewsBy: 'all' | 1 | 2 | 3 | 4 | 5,
+  puppeteerOptions: {},
 }
 ```
 
-1. `reviewsCount` - Defaults to 20 reviews
-1. `filterReviewsBy` - Fetches `all` reviews by default. Pass `1` `2` `3` `4` `5` to filter by specific reviews. Support only 1 rating at once.
+1. `reviewsCount` - Defaults to 20 reviews.
+2. `filterReviewsBy` - Fetches `all` reviews by default. Pass `1` `2` `3` `4` `5` to filter by specific reviews. Support only 1 rating at once.
+3. `puppeteerOptions` - Any options that puppeteer supports.
 
 # Sample JSON Response
 
