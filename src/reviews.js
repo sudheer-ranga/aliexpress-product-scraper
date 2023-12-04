@@ -24,12 +24,17 @@ const getReview = (review) => {
   return data;
 };
 
-const get = async ({ productId, count, rating = "all" }) => {
+const get = async ({ productId, total, limit, rating = "all" }) => {
   let allReviews = [];
   const COUNT_PER_PAGE = 20;
-  let totalPages = Math.ceil(count / COUNT_PER_PAGE);
 
-  /** If totalPages are greater than 10, i.e. if reviews are > 100, limit it to 100 or 10 pages */
+  // if reviews limit requested is less than total reviews, then limit it to total reviews
+  let count = limit;
+  if (limit >= total) {
+    count = total;
+  }
+
+  let totalPages = Math.ceil(count / COUNT_PER_PAGE);
   if (totalPages >= 5) {
     totalPages = 5;
   }

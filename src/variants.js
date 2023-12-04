@@ -27,6 +27,8 @@ const get = ({ priceLists = [], optionsLists = [] }) => {
     };
   });
 
+  // console.log({ options, lists });
+
   return {
     options: options,
     prices: lists,

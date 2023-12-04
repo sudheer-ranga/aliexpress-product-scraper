@@ -1,12 +1,12 @@
-import scrape from "./../src/aliexpressProductScraper.js";
+import scrape from "./../index.js";
 
 scrape({
   id: "1005005167379524",
-  reviewsCount: 10,
+  reviewsCount: 20,
   rating: 2,
 })
   .then((productData) => {
-    console.log(productData);
+    console.log(JSON.stringify(productData, null, 2));
   })
   .catch((error) => {
     console.error(error);

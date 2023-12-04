@@ -51,8 +51,6 @@ const getShippingData = (shippingData) => {
     return returnData;
   });
 
-  console.log("shippingOptions", shippingOptions);
-
   return shippingOptions;
 };
 
