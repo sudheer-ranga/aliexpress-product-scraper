@@ -1,93 +1,124 @@
-const puppeteer = require('puppeteer');
-const cheerio = require('cheerio');
+import puppeteer from "puppeteer";
+import * as cheerio from "cheerio";
 
-const Variants = require('./variants');
-const Feedback = require('./feedback');
+import { get as GetVariants } from "./variants.js";
+import { get as GetReviews } from "./reviews.js";
+import { get as GetShippingDetails } from "./shipping.js";
 
-async function AliexpressProductScraper(productId, feedbackLimit) {
-  const FEEDBACK_LIMIT = feedbackLimit || 10;
-  const browser = await puppeteer.launch();
-  const page = await browser.newPage();
-
-  /** Scrape the aliexpress product page for details */
-  await page.goto(`https://www.aliexpress.com/item/${productId}.html`);
-  const aliExpressData = await page.evaluate(() => runParams);
-
-  const data = aliExpressData.data;
-
-  /** Scrape the description page for the product using the description url */
-  const descriptionUrl = data.descriptionModule.descriptionUrl;
-  await page.goto(descriptionUrl);
-  const descriptionPageHtml = await page.content();
-
-  /** Build the AST for the description page html content using cheerio */
-  const $ = cheerio.load(descriptionPageHtml);
-  const descriptionData = $('body').html();
-
-  /** Fetch the adminAccountId required to fetch the feedbacks */
-  const adminAccountId = await page.evaluate(() => adminAccountId);
-  await browser.close();
-
-  let feedbackData = [];
-
-  if (data.titleModule.feedbackRating.totalValidNum > 0) {
-    feedbackData = await Feedback.get(
-      data.actionModule.productId,
-      adminAccountId,
-      data.titleModule.feedbackRating.totalValidNum,
-      FEEDBACK_LIMIT
-    );
+const AliexpressProductScraper = async (
+  id,
+  { reviewsCount = 20, filterReviewsBy = "all", puppeteerOptions = {} }
+) => {
+  if (!id) {
+    throw new Error("Please provide a valid product id");
   }
 
-  /** Build the JSON response with aliexpress product details */
-  const json = {
-    title: data.titleModule.subject,
-    categoryId: data.actionModule.categoryId,
-    productId: data.actionModule.productId,
-    totalAvailableQuantity: data.quantityModule.totalAvailQuantity,
-    description: descriptionData,
-    orders: data.titleModule.tradeCount,
-    storeInfo: {
-      name: data.storeModule.storeName,
-      companyId: data.storeModule.companyId,
-      storeNumber: data.storeModule.storeNum,
-      followers: data.storeModule.followingNumber,
-      ratingCount: data.storeModule.positiveNum,
-      rating: data.storeModule.positiveRate
-    },
-    ratings: {
-      totalStar: 5,
-      averageStar: data.titleModule.feedbackRating.averageStar,
-      totalStartCount: data.titleModule.feedbackRating.totalValidNum,
-      fiveStarCount: data.titleModule.feedbackRating.fiveStarNum,
-      fourStarCount: data.titleModule.feedbackRating.fourStarNum,
-      threeStarCount: data.titleModule.feedbackRating.threeStarNum,
-      twoStarCount: data.titleModule.feedbackRating.twoStarNum,
-      oneStarCount: data.titleModule.feedbackRating.oneStarNum
-    },
-    images:
-      (data.imageModule &&
-        data.imageModule.imagePathList) ||
-      [],
-    feedback: feedbackData,
-    variants: Variants.get(data.skuModule),
-    specs: data.specsModule.props,
-    currency: data.webEnv.currency,
-    originalPrice: {
-      min: data.priceModule.minAmount.value,
-      max: data.priceModule.maxAmount.value
-    },
-    salePrice: {
-      min: data.priceModule.minActivityAmount 
-        ? data.priceModule.minActivityAmount.value 
-        : data.priceModule.minAmount.value,
-      max: data.priceModule.maxActivityAmount 
-        ? data.priceModule.maxActivityAmount.value 
-        : data.priceModule.maxAmount.value,
+  let browser;
+
+  try {
+    const REVIEWS_COUNT = reviewsCount || 20;
+    browser = await puppeteer.launch({
+      headless: "new",
+      ...(puppeteerOptions || {}),
+    });
+    const page = await browser.newPage();
+
+    /** Scrape the aliexpress product page for details */
+    await page.goto(`https://www.aliexpress.com/item/${id}.html`);
+    const aliExpressData = await page.evaluate(() => runParams);
+
+    const data = aliExpressData?.data;
+    if (!data) {
+      throw new Error("No data found");
     }
-  };
 
-  return json;
-}
+    const shipping = GetShippingDetails(
+      data?.webGeneralFreightCalculateComponent?.originalLayoutResultList || []
+    );
 
-module.exports = AliexpressProductScraper;
+    /** Scrape the description page for the product using the description url */
+    const descriptionUrl = data?.productDescComponent?.descriptionUrl;
+    let descriptionDataPromise = null;
+    if (descriptionUrl) {
+      descriptionDataPromise = page.goto(descriptionUrl).then(async () => {
+        const descriptionPageHtml = await page.content();
+        const $ = cheerio.load(descriptionPageHtml);
+        return $("body").html();
+      });
+    }
+
+    const reviewsPromise = GetReviews({
+      productId: id,
+      limit: REVIEWS_COUNT,
+      total: data.feedbackComponent.totalValidNum,
+      filterReviewsBy,
+    });
+
+    const [descriptionData, reviews] = await Promise.all([
+      descriptionDataPromise,
+      reviewsPromise,
+    ]);
+
+    await browser.close();
+
+    /** Build the JSON response with aliexpress product details */
+    const json = {
+      title: data.productInfoComponent.subject,
+      categoryId: data.productInfoComponent.categoryId,
+      productId: data.productInfoComponent.id,
+      quantity: {
+        total: data.inventoryComponent.totalQuantity,
+        available: data.inventoryComponent.totalAvailQuantity,
+      },
+      description: descriptionData,
+      orders: data.tradeComponent.formatTradeCount,
+      storeInfo: {
+        name: data.sellerComponent.storeName,
+        logo: data.sellerComponent.storeLogo,
+        companyId: data.sellerComponent.companyId,
+        storeNumber: data.sellerComponent.storeNum,
+        isTopRated: data.sellerComponent.topRatedSeller,
+        hasPayPalAccount: data.sellerComponent.payPalAccount,
+        ratingCount: data.storeFeedbackComponent.sellerPositiveNum,
+        rating: data.storeFeedbackComponent.sellerPositiveRate,
+      },
+      ratings: {
+        totalStar: 5,
+        averageStar: data.feedbackComponent.evarageStar,
+        totalStartCount: data.feedbackComponent.totalValidNum,
+        fiveStarCount: data.feedbackComponent.fiveStarNum,
+        fourStarCount: data.feedbackComponent.fourStarNum,
+        threeStarCount: data.feedbackComponent.threeStarNum,
+        twoStarCount: data.feedbackComponent.twoStarNum,
+        oneStarCount: data.feedbackComponent.oneStarNum,
+      },
+      images: (data.imageComponent && data.imageComponent.imagePathList) || [],
+      reviews,
+      variants: GetVariants({
+        optionsLists: data?.skuComponent?.productSKUPropertyList || [],
+        priceLists: data?.priceComponent?.skuPriceList || [],
+      }),
+      specs: data.productPropComponent.props,
+      currencyInfo: data.currencyComponent,
+      originalPrice: {
+        min: data.priceComponent.origPrice.minAmount,
+        max: data.priceComponent.origPrice.maxAmount,
+      },
+      salePrice: {
+        min: data.priceComponent.discountPrice.minActivityAmount,
+        max: data.priceComponent.discountPrice.maxActivityAmount,
+      },
+      shipping,
+    };
+
+    return json;
+  } catch (error) {
+    console.error(error);
+    if (browser) {
+      await browser.close();
+    }
+    throw error;
+  }
+};
+
+export default AliexpressProductScraper;

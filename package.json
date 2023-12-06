@@ -1,8 +1,9 @@
 {
   "name": "aliexpress-product-scraper",
-  "version": "1.0.6",
+  "version": "2.0.0",
   "description": "Get Aliexpress product details as a json reponse including feedbacks, variants, description, images, etc.,",
   "main": "index.js",
+  "type": "module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -27,9 +28,11 @@
   "author": "Sudheer Ranga",
   "license": "MIT",
   "dependencies": {
-    "cheerio": "^1.0.0-rc.10",
-    "faker": "^5.5.3",
-    "node-fetch": "^2.6.1",
-    "puppeteer": "^10.0.0"
+    "cheerio": "1.0.0-rc.12",
+    "node-fetch": "3.3.2",
+    "puppeteer": "21.5.2"
+  },
+  "devDependencies": {
+    "@faker-js/faker": "8.3.1"
   }
 }
