@@ -7,7 +7,7 @@ import { get as GetShippingDetails } from "./shipping.js";
 
 const AliexpressProductScraper = async (
   id,
-  { reviewsCount = 20, filterReviewsBy = "all", puppeteerOptions = {} }
+  { reviewsCount = 20, filterReviewsBy = "all", puppeteerOptions = {} } = {}
 ) => {
   if (!id) {
     throw new Error("Please provide a valid product id");
