@@ -1,7 +1,6 @@
 # Aliexpress Product Scraper
 
-[![Build Status](https://api.travis-ci.org/sudheer-ranga/aliexpress-product-scraper.svg?branch=master)](https://travis-ci.org/sudheer-ranga/aliexpress-product-scraper)
-
+[![Node.js Package](https://github.com/sudheer-ranga/aliexpress-product-scraper/actions/workflows/npm-publish.yml/badge.svg?branch=master)](https://github.com/sudheer-ranga/aliexpress-product-scraper/actions/workflows/npm-publish.yml)
 Aliexpress Product Scraper scrapes product information and returns the response in json format including:
 
 - Description
