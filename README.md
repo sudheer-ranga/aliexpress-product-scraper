@@ -1,6 +1,6 @@
-# Aliexpress Product Scraper
+# Cachiman Product Scraper
 
-[![Node.js Package](https://github.com/sudheer-ranga/aliexpress-product-scraper/actions/workflows/npm-publish.yml/badge.svg?branch=master)](https://github.com/sudheer-ranga/aliexpress-product-scraper/actions/workflows/npm-publish.yml)
+[![Node.js Package](https://github.com/sudheer-ranga/Cachiman-product-scraper/actions/workflows/npm-publish.yml/badge.svg?branch=master)](https://github.com/sudheer-ranga/aliexpress-product-scraper/actions/workflows/npm-publish.yml)
 Aliexpress Product Scraper scrapes product information and returns the response in json format including:
 
 - Description
@@ -15,7 +15,7 @@ npm i aliexpress-product-scraper
 ```
 
 ```
-import scrape from 'aliexpress-product-scraper';
+import scrape from 'Cachiman-product-scraper';
 
 scrape('1005005167379524', options).then(res => {
   console.log('Product JSON: ', res);
@@ -24,7 +24,7 @@ scrape('1005005167379524', options).then(res => {
 
 Initialiser takes id as a string. It also takes options which are optional. Options are defined as below.
 
-`id` - Aliexpress Product ID
+`id` - Cachiman Product ID
 
 Options
 
@@ -107,7 +107,7 @@ Options
     },
     {
       "anonymous": true,
-      "name": "AliExpress Shopper",
+      "name": "Ca Shopper",
       "displayName": "Christy Willms",
       "gender": "female",
       "country": "NG",
