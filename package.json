@@ -28,10 +28,9 @@
   "author": "Sudheer Ranga",
   "license": "MIT",
   "dependencies": {
-    "cheerio": "1.0.0-rc.12",
+    "@faker-js/faker": "10.2.0",
+    "cheerio": "1.1.2",
     "node-fetch": "3.3.2",
-    "puppeteer": "21.5.2",
-    "@faker-js/faker": "8.3.1"
-  },
-  "devDependencies": {}
+    "puppeteer": "24.34.0"
+  }
 }
