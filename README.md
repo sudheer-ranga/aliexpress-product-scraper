@@ -8,6 +8,9 @@ Aliexpress Product Scraper scrapes product information and returns the response 
 - Variants and Prices
 - Shipping Info
 
+## Requirements
+- Node.js >= 22
+
 # How to use?
 
 ```
@@ -39,6 +42,12 @@ Options
 1. `reviewsCount` - Defaults to 20 reviews.
 2. `filterReviewsBy` - Fetches `all` reviews by default. Pass `1` `2` `3` `4` `5` to filter by specific reviews. Support only 1 rating at once.
 3. `puppeteerOptions` - Any options that puppeteer supports.
+
+# Smoke test (optional)
+Run this only when you want to verify live scraping:
+```
+ALIX_SMOKE=1 npm run smoke
+```
 
 # Sample JSON Response
 
