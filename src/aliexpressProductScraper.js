@@ -18,14 +18,14 @@ const AliexpressProductScraper = async (
   try {
     const REVIEWS_COUNT = reviewsCount || 20;
     browser = await puppeteer.launch({
-      headless: "new",
+      headless: true,
       ...(puppeteerOptions || {}),
     });
     const page = await browser.newPage();
 
     /** Scrape the aliexpress product page for details */
     await page.goto(`https://www.aliexpress.com/item/${id}.html`);
-    const aliExpressData = await page.evaluate(() => runParams);
+    const aliExpressData = await page.evaluate(() => window.runParams || null);
 
     const data = aliExpressData?.data;
     if (!data) {
