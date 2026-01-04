@@ -24,13 +24,13 @@
 5. Avoid working directly on `master`.
 
 ## Proposed Branch Strategy (Nested/Stacked)
-- Base upgrade branch from `master` (or default branch): `upgrade/node-lts`
+- Base upgrade branch from `master` (or default branch): `upgrade/node-lts/base`
 - Nested branches off the base for focused changes:
   - `upgrade/node-lts/deps` (dependency/version bumps + lockfile)
   - `upgrade/node-lts/compat` (code changes for new APIs/behavior)
   - `upgrade/node-lts/tests` (smoke tests / test harness)
   - `upgrade/node-lts/docs` (README + example updates)
-- Merge nested branches into `upgrade/node-lts` via stacked PRs, then merge `upgrade/node-lts` into `master`.
+- Merge nested branches into `upgrade/node-lts/base` via stacked PRs, then merge `upgrade/node-lts/base` into `master`.
 
 ## Step-by-Step Plan (simple)
 
