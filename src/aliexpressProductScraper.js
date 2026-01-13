@@ -24,12 +24,48 @@ const AliexpressProductScraper = async (
     const page = await browser.newPage();
 
     /** Scrape the aliexpress product page for details */
-    await page.goto(`https://www.aliexpress.com/item/${id}.html`);
-    const aliExpressData = await page.evaluate(() => window.runParams || null);
+    await page.goto(`https://www.aliexpress.com/item/${id}.html`, {
+      waitUntil: "networkidle0",
+      timeout: 30000,
+    });
+
+    // Wait for runParams to be available with retries
+    let aliExpressData = null;
+    const maxRetries = 5;
+    for (let attempt = 0; attempt < maxRetries; attempt++) {
+      aliExpressData = await page.evaluate(() => {
+        try {
+          return window.runParams || null;
+        } catch (error) {
+          return null;
+        }
+      });
+
+      if (aliExpressData) {
+        break;
+      }
+
+      // Wait a bit before retrying (using setTimeout in page context)
+      if (attempt < maxRetries - 1) {
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+      }
+    }
+
+    if (!aliExpressData) {
+      throw new Error(
+        `Failed to extract runParams from AliExpress page for product ID: ${id}. ` +
+        `This may indicate: (1) The product ID is invalid, (2) AliExpress page structure has changed, ` +
+        `(3) The page didn't load completely, or (4) Anti-bot measures are blocking access.`
+      );
+    }
 
     const data = aliExpressData?.data;
     if (!data) {
-      throw new Error("No data found");
+      throw new Error(
+        `runParams.data is missing for product ID: ${id}. ` +
+        `The page loaded but product data structure is incomplete. ` +
+        `This may indicate the product page structure has changed or the product is unavailable.`
+      );
     }
 
     const shipping = GetShippingDetails(
