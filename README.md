@@ -10,12 +10,23 @@ Aliexpress Product Scraper scrapes product information and returns the response 
 
 ## Requirements
 - Node.js >= 22
+- pnpm (recommended) or npm
 
-# How to use?
+## Installation
 
-```
+```bash
+# Using pnpm (recommended)
+pnpm i aliexpress-product-scraper
+
+# Or using npm
 npm i aliexpress-product-scraper
 ```
+
+**Note:** 
+- This project uses `pnpm` as the package manager (see `pnpm-lock.yaml`). While `npm` will work, `pnpm` is recommended for consistency.
+- Puppeteer build scripts are intentionally ignored (see `pnpm-workspace.yaml`) to avoid downloading Chromium during installation. Chromium will be downloaded automatically on first use when running the scraper.
+
+# How to use?
 
 ```
 import scrape from 'aliexpress-product-scraper';
@@ -45,7 +56,11 @@ Options
 
 # Smoke test (optional)
 Run this only when you want to verify live scraping:
-```
+```bash
+# Using pnpm
+ALIX_SMOKE=1 pnpm run smoke
+
+# Or using npm
 ALIX_SMOKE=1 npm run smoke
 ```
 
