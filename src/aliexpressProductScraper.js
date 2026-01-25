@@ -1,13 +1,17 @@
-import puppeteer from "puppeteer";
+import puppeteer from "puppeteer-extra";
+import StealthPlugin from "puppeteer-extra-plugin-stealth";
 import * as cheerio from "cheerio";
 
 import { get as GetVariants } from "./variants.js";
 import { get as GetReviews } from "./reviews.js";
 import { get as GetShippingDetails } from "./shipping.js";
 
+// Use stealth plugin to avoid bot detection
+puppeteer.use(StealthPlugin());
+
 const AliexpressProductScraper = async (
   id,
-  { reviewsCount = 20, filterReviewsBy = "all", puppeteerOptions = {} } = {}
+  { reviewsCount = 20, filterReviewsBy = "all", puppeteerOptions = {}, timeout = 60000 } = {}
 ) => {
   if (!id) {
     throw new Error("Please provide a valid product id");
@@ -26,7 +30,7 @@ const AliexpressProductScraper = async (
     /** Scrape the aliexpress product page for details */
     await page.goto(`https://www.aliexpress.com/item/${id}.html`, {
       waitUntil: "networkidle0",
-      timeout: 30000,
+      timeout: timeout, // Default 60s, can be overridden
     });
 
     // Wait for runParams to be available with retries

@@ -8,10 +8,12 @@ if (!process.env.ALIX_SMOKE) {
 const productId = process.env.ALIX_PRODUCT_ID || "1005005167379524";
 const reviewsCount = Number(process.env.REVIEWS_COUNT || 5);
 const filterReviewsBy = process.env.FILTER_REVIEWS_BY || "all";
+const timeout = Number(process.env.PUPPETEER_TIMEOUT || 60000); // Default 60s
 
 const result = await scrape(productId, {
   reviewsCount,
   filterReviewsBy,
+  timeout, // Page navigation timeout
 });
 
 const requiredKeys = [

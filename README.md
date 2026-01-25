@@ -26,6 +26,96 @@ npm i aliexpress-product-scraper
 - This project uses `pnpm` as the package manager (see `pnpm-lock.yaml`). While `npm` will work, `pnpm` is recommended for consistency.
 - Puppeteer build scripts are intentionally ignored (see `pnpm-workspace.yaml`) to avoid downloading Chromium during installation. Chromium will be downloaded automatically on first use when running the scraper.
 
+## Upgrading from Older Versions
+
+### Breaking Changes in v2.0.2+
+
+**Node.js Version Requirement**
+- **Minimum Node.js version: 22.0.0** (previously supported older versions)
+- This is a breaking change. If you're using Node.js < 22, you'll need to upgrade Node.js first.
+
+### Upgrade Steps
+
+1. **Check your Node.js version:**
+   ```bash
+   node --version
+   ```
+   If it's below v22.0.0, upgrade Node.js first:
+   ```bash
+   # Using nvm (recommended)
+   nvm install 22
+   nvm use 22
+   
+   # Or download from https://nodejs.org/
+   ```
+
+2. **Update the package:**
+   ```bash
+   # Using pnpm
+   pnpm update aliexpress-product-scraper
+   
+   # Or using npm
+   npm update aliexpress-product-scraper
+   
+   # Or reinstall to get latest
+   pnpm remove aliexpress-product-scraper
+   pnpm add aliexpress-product-scraper
+   ```
+
+3. **Install Puppeteer's Chromium (if needed):**
+   ```bash
+   # Puppeteer will download Chromium automatically on first use
+   # Or manually install it:
+   pnpm exec puppeteer browsers install chrome
+   ```
+
+4. **Verify the upgrade:**
+   ```bash
+   # Test with the smoke test
+   ALIX_SMOKE=1 pnpm run smoke
+   ```
+
+### What Changed?
+
+- ✅ **Dependencies upgraded** to latest compatible versions:
+  - `puppeteer`: Updated to v24.34.0
+  - `cheerio`: Updated to v1.1.2
+  - `node-fetch`: Updated to v3.3.2
+  - `@faker-js/faker`: Updated to v10.2.0
+- ✅ **Improved error handling** with better error messages
+- ✅ **Enhanced reliability** with retry logic for page loading
+- ✅ **API remains the same** - no code changes needed in your project
+
+### Troubleshooting
+
+**Issue: "Cannot find module" or import errors**
+- Make sure you're using Node.js >= 22.0.0
+- Clear `node_modules` and reinstall: `rm -rf node_modules && pnpm install`
+
+**Issue: Puppeteer Chrome not found**
+- Run: `pnpm exec puppeteer browsers install chrome`
+- Or set `PUPPETEER_EXECUTABLE_PATH` to use system Chrome
+
+**Issue: Timeout errors**
+- This is **normal and expected** for web scraping - AliExpress may block automated requests or pages may load slowly
+- The default timeout is now 60 seconds (increased from 30s)
+- You can increase it further in `puppeteerOptions`: `{ timeout: 90000 }` (90 seconds)
+- For smoke tests, set `PUPPETEER_TIMEOUT=90000` environment variable
+- Try with a different product ID if one consistently times out
+- Note: Timeouts don't mean the code is broken - it's a network/anti-bot issue
+
+**Issue: "runParams not found" errors**
+- The improved error handling will now provide clearer messages
+- This usually means the page structure changed or the product is unavailable
+
+### Need Help?
+
+If you encounter issues after upgrading:
+1. Check that Node.js version is >= 22.0.0
+2. Clear cache and reinstall dependencies
+3. Check the [TESTING.md](./TESTING.md) guide for validation steps
+4. Open an issue on GitHub with error details
+
 # How to use?
 
 ```
@@ -47,12 +137,14 @@ Options
   reviewsCount: 20,
   filterReviewsBy: 'all' | 1 | 2 | 3 | 4 | 5,
   puppeteerOptions: {},
+  timeout: 60000,
 }
 ```
 
 1. `reviewsCount` - Defaults to 20 reviews.
 2. `filterReviewsBy` - Fetches `all` reviews by default. Pass `1` `2` `3` `4` `5` to filter by specific reviews. Support only 1 rating at once.
-3. `puppeteerOptions` - Any options that puppeteer supports.
+3. `puppeteerOptions` - Any options that puppeteer supports (e.g., `headless`, `args`, etc.).
+4. `timeout` - Page navigation timeout in milliseconds. Defaults to 60000 (60 seconds). Increase if you get timeout errors.
 
 # Smoke test (optional)
 Run this only when you want to verify live scraping:
@@ -62,7 +154,15 @@ ALIX_SMOKE=1 pnpm run smoke
 
 # Or using npm
 ALIX_SMOKE=1 npm run smoke
+
+# With custom timeout (if you get timeout errors)
+ALIX_SMOKE=1 PUPPETEER_TIMEOUT=90000 pnpm run smoke
+
+# With custom product ID
+ALIX_SMOKE=1 ALIX_PRODUCT_ID=1005001234567890 pnpm run smoke
 ```
+
+**Note:** Timeout errors during smoke tests are normal - AliExpress may block automated requests. This doesn't mean the code is broken.
 
 # Sample JSON Response
 
