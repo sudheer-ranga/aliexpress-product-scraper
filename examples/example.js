@@ -1,6 +1,7 @@
 import scrape from "./../index.js";
 
-scrape("1005005167379524", {
+// Using a known working product ID (Wireless Keyboard - verified Jan 2025)
+scrape("1005007429636284", {
   reviewsCount: 20,
   filterReviewsBy: 2,
 })

@@ -8,8 +8,8 @@ import StealthPlugin from "puppeteer-extra-plugin-stealth";
 // Use stealth plugin to avoid bot detection
 puppeteer.use(StealthPlugin());
 
-// Try multiple product IDs - some may be unavailable
-const productId = process.env.ALIX_PRODUCT_ID || "1005007294905498";
+// Default to a known working product (Wireless Keyboard - verified Jan 2025)
+const productId = process.env.ALIX_PRODUCT_ID || "1005007429636284";
 const headless = process.env.HEADLESS !== "false"; // Default to headless, set HEADLESS=false to see browser
 
 console.log("=== AliExpress Scraper Debug Test ===");
@@ -98,26 +98,107 @@ async function debugTest() {
       }
     }
 
-    // Check for runParams
-    console.log("4. Checking for runParams...");
-    const runParamsCheck = await page.evaluate(() => {
-      return {
+    // Check for runParams and other data sources
+    console.log("4. Checking for data sources...");
+    const dataCheck = await page.evaluate(() => {
+      // Check various possible data locations
+      const result = {
+        // Original runParams
         hasRunParams: typeof window.runParams !== "undefined",
+        runParamsKeys: window.runParams ? Object.keys(window.runParams) : [],
+        runParamsType: typeof window.runParams,
+        runParamsPreview: window.runParams ? JSON.stringify(window.runParams).substring(0, 500) : null,
+        
+        // Check runParams.data
         hasData: typeof window.runParams?.data !== "undefined",
-        keys: window.runParams ? Object.keys(window.runParams) : [],
-        dataKeys: window.runParams?.data ? Object.keys(window.runParams.data) : [],
+        dataKeys: window.runParams?.data ? Object.keys(window.runParams.data).slice(0, 20) : [],
+        
+        // Check for __INIT_DATA__ (another common pattern)
+        hasInitData: typeof window.__INIT_DATA__ !== "undefined",
+        initDataKeys: window.__INIT_DATA__ ? Object.keys(window.__INIT_DATA__) : [],
+        
+        // Check for __PRELOADED_STATE__
+        hasPreloadedState: typeof window.__PRELOADED_STATE__ !== "undefined",
+        
+        // Check for data in script tags
+        scriptDataCount: document.querySelectorAll('script[type="application/json"]').length,
+        
+        // Check all window properties that might contain data
+        windowDataProps: Object.keys(window).filter(k => 
+          k.includes('data') || k.includes('Data') || k.includes('params') || k.includes('Params') || k.includes('init') || k.includes('Init')
+        ).slice(0, 20),
+      };
+      
+      return result;
+    });
+    
+    console.log(`   runParams exists: ${dataCheck.hasRunParams}`);
+    console.log(`   runParams type: ${dataCheck.runParamsType}`);
+    console.log(`   runParams keys: ${dataCheck.runParamsKeys.join(", ") || "(empty)"}`);
+    console.log(`   runParams.data exists: ${dataCheck.hasData}`);
+    if (dataCheck.hasData) {
+      console.log(`   runParams.data keys: ${dataCheck.dataKeys.join(", ")}`);
+    }
+    console.log(`   __INIT_DATA__ exists: ${dataCheck.hasInitData}`);
+    if (dataCheck.hasInitData) {
+      console.log(`   __INIT_DATA__ keys: ${dataCheck.initDataKeys.join(", ")}`);
+    }
+    console.log(`   __PRELOADED_STATE__ exists: ${dataCheck.hasPreloadedState}`);
+    console.log(`   Script[type=application/json] count: ${dataCheck.scriptDataCount}`);
+    console.log(`   Window data-related props: ${dataCheck.windowDataProps.join(", ") || "(none)"}`);
+    if (dataCheck.runParamsPreview) {
+      console.log(`   runParams preview: ${dataCheck.runParamsPreview}...`);
+    }
+    
+    // Check the 'data' property specifically
+    const windowDataCheck = await page.evaluate(() => {
+      if (typeof window.data !== 'undefined') {
+        return {
+          type: typeof window.data,
+          keys: typeof window.data === 'object' ? Object.keys(window.data).slice(0, 20) : [],
+          preview: JSON.stringify(window.data).substring(0, 500),
+        };
+      }
+      return null;
+    });
+    
+    if (windowDataCheck) {
+      console.log(`\n   window.data:`);
+      console.log(`     type: ${windowDataCheck.type}`);
+      console.log(`     keys: ${windowDataCheck.keys.join(", ")}`);
+      console.log(`     preview: ${windowDataCheck.preview}...`);
+    }
+    
+    // Look for JSON in script tags
+    const scriptData = await page.evaluate(() => {
+      const scripts = Array.from(document.querySelectorAll('script'));
+      const jsonScripts = scripts
+        .map(s => s.textContent)
+        .filter(t => t && (t.includes('productInfoComponent') || t.includes('skuComponent') || t.includes('priceComponent')))
+        .map(t => t.substring(0, 300));
+      
+      // Also check for inline scripts that set runParams
+      const runParamsScripts = scripts
+        .map(s => s.textContent)
+        .filter(t => t && t.includes('runParams'))
+        .map(t => t.substring(0, 500));
+      
+      return {
+        jsonScriptsCount: jsonScripts.length,
+        jsonScriptsPreview: jsonScripts.slice(0, 2),
+        runParamsScriptsCount: runParamsScripts.length,
+        runParamsScriptsPreview: runParamsScripts.slice(0, 2),
       };
     });
     
-    console.log(`   runParams exists: ${runParamsCheck.hasRunParams}`);
-    console.log(`   runParams.data exists: ${runParamsCheck.hasData}`);
+    console.log(`\n   Script analysis:`);
+    console.log(`     Scripts with product data: ${scriptData.jsonScriptsCount}`);
+    console.log(`     Scripts with runParams: ${scriptData.runParamsScriptsCount}`);
+    if (scriptData.runParamsScriptsPreview.length > 0) {
+      console.log(`     runParams script preview: ${scriptData.runParamsScriptsPreview[0]?.substring(0, 200)}...`);
+    }
     
-    if (runParamsCheck.hasRunParams) {
-      console.log(`   runParams keys: ${runParamsCheck.keys.join(", ")}`);
-    }
-    if (runParamsCheck.hasData) {
-      console.log(`   runParams.data keys: ${runParamsCheck.dataKeys.slice(0, 10).join(", ")}...`);
-    }
+    const runParamsCheck = dataCheck;
 
     // Get page title to verify we're on the right page
     const pageTitle = await page.title();
