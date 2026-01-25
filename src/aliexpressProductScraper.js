@@ -28,6 +28,30 @@ const parseJsonp = (jsonpStr) => {
 };
 
 /**
+ * Build SKU price list from new API format
+ * New API uses skuPaths (array) + skuPriceInfoMap (object) instead of skuPriceList
+ */
+const buildSkuPriceList = (skuPaths, skuPriceInfoMap) => {
+  if (!skuPaths || !skuPriceInfoMap) return [];
+  
+  // skuPaths is an object with numeric keys
+  const pathsArray = Object.values(skuPaths);
+  
+  return pathsArray.map(sku => {
+    const priceInfo = skuPriceInfoMap[sku.skuIdStr] || skuPriceInfoMap[sku.skuId];
+    return {
+      skuId: sku.skuId,
+      skuPropIds: sku.path, // e.g., "14:193;200009450:201450908"
+      skuVal: {
+        availQuantity: sku.skuStock || 0,
+        skuAmount: priceInfo?.originalPrice || null,
+        skuActivityAmount: priceInfo?.warmUpPrice || priceInfo?.salePrice || null,
+      },
+    };
+  });
+};
+
+/**
  * Extract product data from API response
  * The new AliExpress CSR pages load data via mtop.aliexpress.pdp.pc.query API
  * 
@@ -90,27 +114,34 @@ const extractDataFromApiResponse = (apiData) => {
       imagePathList: result.HEADER_IMAGE_PC?.imagePathList || [],
     },
     skuComponent: {
-      productSKUPropertyList: result.SKU?.productSKUPropertyList || [],
+      // New API uses skuProperties instead of productSKUPropertyList
+      productSKUPropertyList: result.SKU?.skuProperties || result.SKU?.productSKUPropertyList || [],
     },
     priceComponent: {
-      skuPriceList: result.SKU?.skuPriceList || result.PRICE?.skuPriceList || [],
+      // Build skuPriceList from skuPaths + skuPriceInfoMap (new API format)
+      skuPriceList: buildSkuPriceList(result.SKU?.skuPaths, result.PRICE?.skuPriceInfoMap) || 
+                    result.SKU?.skuPriceList || result.PRICE?.skuPriceList || [],
+      // Price info is in targetSkuPriceInfo for new API
       origPrice: {
-        minAmount: result.PRICE?.origPrice?.minAmount || result.PRICE?.minPrice || null,
-        maxAmount: result.PRICE?.origPrice?.maxAmount || result.PRICE?.maxPrice || null,
+        minAmount: result.PRICE?.targetSkuPriceInfo?.originalPrice || result.PRICE?.origPrice?.minAmount || null,
+        maxAmount: result.PRICE?.targetSkuPriceInfo?.originalPrice || result.PRICE?.origPrice?.maxAmount || null,
       },
       discountPrice: {
-        minActivityAmount: result.PRICE?.discountPrice?.minActivityAmount || result.PRICE?.minActivityPrice || null,
-        maxActivityAmount: result.PRICE?.discountPrice?.maxActivityAmount || result.PRICE?.maxActivityPrice || null,
+        minActivityAmount: result.PRICE?.targetSkuPriceInfo?.warmUpPrice || result.PRICE?.targetSkuPriceInfo?.salePrice || null,
+        maxActivityAmount: result.PRICE?.targetSkuPriceInfo?.warmUpPrice || result.PRICE?.targetSkuPriceInfo?.salePrice || null,
       },
     },
     productDescComponent: {
-      descriptionUrl: result.DESC?.descUrl || null,
+      // New API uses pcDescUrl instead of descUrl
+      descriptionUrl: result.DESC?.pcDescUrl || result.DESC?.descUrl || null,
     },
     webGeneralFreightCalculateComponent: {
-      originalLayoutResultList: result.SHIPPING?.freightResult?.resultList || [],
+      // Shipping data is in originalLayoutResultList
+      originalLayoutResultList: result.SHIPPING?.originalLayoutResultList || [],
     },
     productPropComponent: {
-      props: result.PRODUCT_PROP_PC?.props || [],
+      // Props are in showedProps for new API
+      props: result.PRODUCT_PROP_PC?.showedProps || result.PRODUCT_PROP_PC?.props || [],
     },
     currencyComponent: {
       currencyCode: globalData.currencyCode || "USD",
