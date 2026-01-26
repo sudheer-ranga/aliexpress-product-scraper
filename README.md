@@ -1,6 +1,9 @@
 # AliExpress Product Scraper
 
-[![Node.js Package](https://github.com/sudheer-ranga/aliexpress-product-scraper/actions/workflows/npm-publish.yml/badge.svg?branch=master)](https://github.com/sudheer-ranga/aliexpress-product-scraper/actions/workflows/npm-publish.yml)
+[![npm version](https://img.shields.io/npm/v/aliexpress-product-scraper.svg)](https://www.npmjs.com/package/aliexpress-product-scraper)
+[![Node.js Version](https://img.shields.io/node/v/aliexpress-product-scraper.svg)](https://nodejs.org)
+[![CI](https://github.com/sudheer-ranga/aliexpress-product-scraper/actions/workflows/ci.yml/badge.svg)](https://github.com/sudheer-ranga/aliexpress-product-scraper/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 Scrapes AliExpress product information and returns JSON data including:
 
