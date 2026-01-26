@@ -41,18 +41,18 @@ const get = async ({ productId, total, limit, filterReviewsBy = "all" }) => {
 
   for (let currentPage = 1; currentPage <= totalPages; currentPage++) {
     const reviewUrl = `https://feedback.aliexpress.com/pc/searchEvaluation.do?productId=${productId}&page=${currentPage}&pageSize=${COUNT_PER_PAGE}&filter=${filterReviewsBy}`;
-    
+
     try {
       const review = await fetch(reviewUrl);
-      
+
       if (!review.ok) {
         console.warn(
           `Failed to fetch reviews page ${currentPage} for product ${productId}: ` +
-          `HTTP ${review.status} ${review.statusText}`
+            `HTTP ${review.status} ${review.statusText}`
         );
         break; // Stop fetching if we get an error
       }
-      
+
       const reviewJson = await review.json();
 
       const reviews = reviewJson?.data?.evaViewList || [];
@@ -74,9 +74,7 @@ const get = async ({ productId, total, limit, filterReviewsBy = "all" }) => {
       // Continue to next page or break if it's a critical error
       if (currentPage === 1) {
         // If first page fails, it's likely a critical issue
-        throw new Error(
-          `Failed to fetch reviews for product ${productId}: ${error.message}`
-        );
+        throw new Error(`Failed to fetch reviews for product ${productId}: ${error.message}`);
       }
       break;
     }

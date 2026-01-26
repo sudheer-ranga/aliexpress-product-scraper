@@ -16,13 +16,13 @@ puppeteer.use(StealthPlugin());
 const parseJsonp = (jsonpStr) => {
   // Trim whitespace
   const trimmed = jsonpStr.trim();
-  
+
   // Match JSONP pattern: functionName({...})
   const match = trimmed.match(/^[a-zA-Z0-9_]+\(([\s\S]+)\)$/);
   if (match && match[1]) {
     return JSON.parse(match[1]);
   }
-  
+
   // Try parsing as plain JSON
   return JSON.parse(trimmed);
 };
@@ -35,30 +35,30 @@ const getSalePrice = (priceInfo) => {
   if (!priceInfo) {
     return null;
   }
-  
+
   // Check for warmUpPrice object (used during promotions)
   if (priceInfo.warmUpPrice) {
     return priceInfo.warmUpPrice;
   }
-  
+
   // Check for salePrice object
   if (priceInfo.salePrice) {
     return priceInfo.salePrice;
   }
-  
+
   // Parse from salePriceString (format: "Rs.3,224.17")
   if (priceInfo.salePriceString) {
     const match = priceInfo.salePriceString.match(/([^\d]*)([0-9,.]+)/);
     if (match) {
-      const value = parseFloat(match[2].replace(/,/g, ''));
+      const value = parseFloat(match[2].replace(/,/g, ""));
       return {
-        currency: priceInfo.originalPrice?.currency || 'USD',
+        currency: priceInfo.originalPrice?.currency || "USD",
         formatedAmount: priceInfo.salePriceString,
         value: value,
       };
     }
   }
-  
+
   return null;
 };
 
@@ -70,11 +70,11 @@ const buildSkuPriceList = (skuPaths, skuPriceInfoMap) => {
   if (!skuPaths || !skuPriceInfoMap) {
     return [];
   }
-  
+
   // skuPaths is an object with numeric keys
   const pathsArray = Object.values(skuPaths);
-  
-  return pathsArray.map(sku => {
+
+  return pathsArray.map((sku) => {
     const priceInfo = skuPriceInfoMap[sku.skuIdStr] || skuPriceInfoMap[sku.skuId];
     return {
       skuId: sku.skuId,
@@ -91,7 +91,7 @@ const buildSkuPriceList = (skuPaths, skuPriceInfoMap) => {
 /**
  * Extract product data from API response
  * The new AliExpress CSR pages load data via mtop.aliexpress.pdp.pc.query API
- * 
+ *
  * New API structure (2024+):
  * - PRODUCT_TITLE: title info
  * - HEADER_IMAGE_PC: images
@@ -113,7 +113,7 @@ const extractDataFromApiResponse = (apiData) => {
 
   // Extract global data - note it's nested: GLOBAL_DATA.globalData
   const globalData = result.GLOBAL_DATA?.globalData || {};
-  
+
   // Map the new API response format to maintain backwards compatibility
   return {
     productInfoComponent: {
@@ -158,17 +158,32 @@ const extractDataFromApiResponse = (apiData) => {
     },
     priceComponent: {
       // Build skuPriceList from skuPaths + skuPriceInfoMap (new API format)
-      skuPriceList: buildSkuPriceList(result.SKU?.skuPaths, result.PRICE?.skuPriceInfoMap) || 
-                    result.SKU?.skuPriceList || result.PRICE?.skuPriceList || [],
+      skuPriceList:
+        buildSkuPriceList(result.SKU?.skuPaths, result.PRICE?.skuPriceInfoMap) ||
+        result.SKU?.skuPriceList ||
+        result.PRICE?.skuPriceList ||
+        [],
       // Price info is in targetSkuPriceInfo for new API
       origPrice: {
-        minAmount: result.PRICE?.targetSkuPriceInfo?.originalPrice || result.PRICE?.origPrice?.minAmount || null,
-        maxAmount: result.PRICE?.targetSkuPriceInfo?.originalPrice || result.PRICE?.origPrice?.maxAmount || null,
+        minAmount:
+          result.PRICE?.targetSkuPriceInfo?.originalPrice ||
+          result.PRICE?.origPrice?.minAmount ||
+          null,
+        maxAmount:
+          result.PRICE?.targetSkuPriceInfo?.originalPrice ||
+          result.PRICE?.origPrice?.maxAmount ||
+          null,
       },
       discountPrice: {
         // Sale price can be in warmUpPrice, salePrice, or parsed from salePriceString
-        minActivityAmount: getSalePrice(result.PRICE?.targetSkuPriceInfo) || result.PRICE?.discountPrice?.minActivityAmount || null,
-        maxActivityAmount: getSalePrice(result.PRICE?.targetSkuPriceInfo) || result.PRICE?.discountPrice?.maxActivityAmount || null,
+        minActivityAmount:
+          getSalePrice(result.PRICE?.targetSkuPriceInfo) ||
+          result.PRICE?.discountPrice?.minActivityAmount ||
+          null,
+        maxActivityAmount:
+          getSalePrice(result.PRICE?.targetSkuPriceInfo) ||
+          result.PRICE?.discountPrice?.maxActivityAmount ||
+          null,
       },
     },
     productDescComponent: {
@@ -210,11 +225,11 @@ const AliexpressProductScraper = async (
     // Set up response interception to capture the product data API
     // AliExpress uses CSR (Client-Side Rendering) and loads data via mtop API
     let apiData = null;
-    
-    page.on('response', async (response) => {
+
+    page.on("response", async (response) => {
       const url = response.url();
       // Capture the product detail API response
-      if (url.includes('mtop.aliexpress') && url.includes('pdp')) {
+      if (url.includes("mtop.aliexpress") && url.includes("pdp")) {
         try {
           const text = await response.text();
           if (text && text.length > 1000) {
@@ -239,8 +254,8 @@ const AliexpressProductScraper = async (
     let data = null;
     const maxWaitTime = 15000; // 15 seconds max
     const startTime = Date.now();
-    
-    while (!data && (Date.now() - startTime) < maxWaitTime) {
+
+    while (!data && Date.now() - startTime < maxWaitTime) {
       // First try to get data from intercepted API
       if (apiData) {
         data = extractDataFromApiResponse(apiData);
@@ -248,7 +263,7 @@ const AliexpressProductScraper = async (
           break;
         }
       }
-      
+
       // Also try the traditional runParams approach (for backwards compatibility)
       const runParamsData = await page.evaluate(() => {
         try {
@@ -257,20 +272,20 @@ const AliexpressProductScraper = async (
           return null;
         }
       });
-      
+
       if (runParamsData && Object.keys(runParamsData).length > 0) {
         data = runParamsData;
         break;
       }
-      
+
       await new Promise((resolve) => setTimeout(resolve, 500));
     }
 
     if (!data) {
       throw new Error(
         `Failed to extract product data for product ID: ${id}. ` +
-        `This may indicate: (1) The product ID is invalid, (2) AliExpress page structure has changed, ` +
-        `(3) The page didn't load completely, or (4) Anti-bot measures are blocking access.`
+          `This may indicate: (1) The product ID is invalid, (2) AliExpress page structure has changed, ` +
+          `(3) The page didn't load completely, or (4) Anti-bot measures are blocking access.`
       );
     }
 
@@ -296,10 +311,7 @@ const AliexpressProductScraper = async (
       filterReviewsBy,
     });
 
-    const [descriptionData, reviews] = await Promise.all([
-      descriptionDataPromise,
-      reviewsPromise,
-    ]);
+    const [descriptionData, reviews] = await Promise.all([descriptionDataPromise, reviewsPromise]);
 
     await browser.close();
 

@@ -18,14 +18,7 @@ const result = await scrape(productId, {
 });
 
 // Required keys - description can be null if not available
-const requiredKeys = [
-  "title",
-  "productId",
-  "images",
-  "reviews",
-  "variants",
-  "shipping",
-];
+const requiredKeys = ["title", "productId", "images", "reviews", "variants", "shipping"];
 
 for (const key of requiredKeys) {
   if (result?.[key] == null) {

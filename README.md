@@ -1,8 +1,12 @@
 # AliExpress Product Scraper
 
-[![Node.js Package](https://github.com/sudheer-ranga/aliexpress-product-scraper/actions/workflows/npm-publish.yml/badge.svg?branch=master)](https://github.com/sudheer-ranga/aliexpress-product-scraper/actions/workflows/npm-publish.yml)
+[![npm version](https://img.shields.io/npm/v/aliexpress-product-scraper.svg)](https://www.npmjs.com/package/aliexpress-product-scraper)
+[![Node.js Version](https://img.shields.io/node/v/aliexpress-product-scraper.svg)](https://nodejs.org)
+[![CI](https://github.com/sudheer-ranga/aliexpress-product-scraper/actions/workflows/ci.yml/badge.svg)](https://github.com/sudheer-ranga/aliexpress-product-scraper/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 Scrapes AliExpress product information and returns JSON data including:
+
 - Product details (title, images, description)
 - Reviews with photos
 - Variants and prices
@@ -23,20 +27,20 @@ npm install aliexpress-product-scraper
 ## Usage
 
 ```javascript
-import scrape from 'aliexpress-product-scraper';
+import scrape from "aliexpress-product-scraper";
 
-const data = await scrape('1005007429636284');
+const data = await scrape("1005007429636284");
 console.log(data.title, data.salePrice);
 ```
 
 ### Options
 
-| Option | Type | Default | Description |
-|--------|------|---------|-------------|
-| `reviewsCount` | number | 20 | Number of reviews to fetch |
-| `filterReviewsBy` | 'all' \| 1-5 | 'all' | Filter reviews by star rating |
-| `puppeteerOptions` | object | {} | Puppeteer launch options |
-| `timeout` | number | 60000 | Page navigation timeout (ms) |
+| Option             | Type         | Default | Description                   |
+| ------------------ | ------------ | ------- | ----------------------------- |
+| `reviewsCount`     | number       | 20      | Number of reviews to fetch    |
+| `filterReviewsBy`  | 'all' \| 1-5 | 'all'   | Filter reviews by star rating |
+| `puppeteerOptions` | object       | {}      | Puppeteer launch options      |
+| `timeout`          | number       | 60000   | Page navigation timeout (ms)  |
 
 ---
 
@@ -44,11 +48,11 @@ console.log(data.title, data.salePrice);
 
 ### Breaking Changes
 
-| Change | v2.x | v3.0.0 |
-|--------|------|--------|
-| Node.js | Any | **>= 22.0.0** |
+| Change         | v2.x            | v3.0.0                 |
+| -------------- | --------------- | ---------------------- |
+| Node.js        | Any             | **>= 22.0.0**          |
 | AliExpress API | SSR (runParams) | CSR (API interception) |
-| Bot detection | Basic | Stealth plugin |
+| Bot detection  | Basic           | Stealth plugin         |
 
 ### Upgrade Steps
 
@@ -79,12 +83,12 @@ node -e "import('aliexpress-product-scraper').then(m => console.log('OK'))"
 
 ## Troubleshooting
 
-| Issue | Solution |
-|-------|----------|
-| "Cannot find module" | Use Node.js >= 22.0.0 |
+| Issue                      | Solution                                    |
+| -------------------------- | ------------------------------------------- |
+| "Cannot find module"       | Use Node.js >= 22.0.0                       |
 | Puppeteer Chrome not found | Run `npx puppeteer browsers install chrome` |
-| Timeout errors | Increase timeout: `{ timeout: 90000 }` |
-| Empty data | Product may be unavailable or blocked |
+| Timeout errors             | Increase timeout: `{ timeout: 90000 }`      |
+| Empty data                 | Product may be unavailable or blocked       |
 
 ---
 
@@ -97,7 +101,7 @@ npm install
 # Run linter
 npm run lint
 
-# Auto-fix lint errors  
+# Auto-fix lint errors
 npm run lint:fix
 
 # Run smoke test (live scraping test)
@@ -109,12 +113,12 @@ node scripts/debug-test.js
 
 ### Scripts
 
-| Script | Description |
-|--------|-------------|
-| `npm run lint` | Check code quality |
-| `npm run lint:fix` | Auto-fix lint errors |
-| `npm run smoke` | Live scraping test (requires `ALIX_SMOKE=1`) |
-| `node scripts/debug-test.js` | Diagnostic tool with verbose output |
+| Script                       | Description                                  |
+| ---------------------------- | -------------------------------------------- |
+| `npm run lint`               | Check code quality                           |
+| `npm run lint:fix`           | Auto-fix lint errors                         |
+| `npm run smoke`              | Live scraping test (requires `ALIX_SMOKE=1`) |
+| `node scripts/debug-test.js` | Diagnostic tool with verbose output          |
 
 A pre-commit hook automatically runs ESLint on staged files.
 
