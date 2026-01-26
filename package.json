@@ -1,6 +1,6 @@
 {
   "name": "aliexpress-product-scraper",
-  "version": "2.0.2",
+  "version": "3.0.0",
   "description": "Get Aliexpress product details as a json reponse including feedbacks, variants, description, images, etc.,",
   "main": "index.js",
   "type": "module",

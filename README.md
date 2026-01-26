@@ -1,134 +1,35 @@
-# Aliexpress Product Scraper
+# AliExpress Product Scraper
 
 [![Node.js Package](https://github.com/sudheer-ranga/aliexpress-product-scraper/actions/workflows/npm-publish.yml/badge.svg?branch=master)](https://github.com/sudheer-ranga/aliexpress-product-scraper/actions/workflows/npm-publish.yml)
-Aliexpress Product Scraper scrapes product information and returns the response in json format including:
 
-- Description
-- Reviews
-- Variants and Prices
-- Shipping Info
+Scrapes AliExpress product information and returns JSON data including:
+- Product details (title, images, description)
+- Reviews with photos
+- Variants and prices
+- Shipping info
+- Store info and ratings
 
 ## Requirements
-- Node.js >= 22
-- pnpm (recommended) or npm
+
+- **Node.js >= 22.0.0** (required)
+- npm or pnpm
 
 ## Installation
 
 ```bash
-# Using pnpm (recommended)
-pnpm i aliexpress-product-scraper
-
-# Or using npm
-npm i aliexpress-product-scraper
+npm install aliexpress-product-scraper
 ```
 
-**Note:** 
-- This project uses `pnpm` as the package manager (see `pnpm-lock.yaml`). While `npm` will work, `pnpm` is recommended for consistency.
-- Puppeteer build scripts are intentionally ignored (see `pnpm-workspace.yaml`) to avoid downloading Chromium during installation. Chromium will be downloaded automatically on first use when running the scraper.
-
-## Upgrading from Older Versions
-
-### Breaking Changes in v2.0.2+
-
-**Node.js Version Requirement**
-- **Minimum Node.js version: 22.0.0** (previously supported older versions)
-- This is a breaking change. If you're using Node.js < 22, you'll need to upgrade Node.js first.
-
-### Upgrade Steps
-
-1. **Check your Node.js version:**
-   ```bash
-   node --version
-   ```
-   If it's below v22.0.0, upgrade Node.js first:
-   ```bash
-   # Using nvm (recommended)
-   nvm install 22
-   nvm use 22
-   
-   # Or download from https://nodejs.org/
-   ```
-
-2. **Update the package:**
-   ```bash
-   # Using pnpm
-   pnpm update aliexpress-product-scraper
-   
-   # Or using npm
-   npm update aliexpress-product-scraper
-   
-   # Or reinstall to get latest
-   pnpm remove aliexpress-product-scraper
-   pnpm add aliexpress-product-scraper
-   ```
-
-3. **Install Puppeteer's Chromium (if needed):**
-   ```bash
-   # Puppeteer will download Chromium automatically on first use
-   # Or manually install it:
-   pnpm exec puppeteer browsers install chrome
-   ```
-
-4. **Verify the upgrade:**
-   ```bash
-   # Test with the smoke test
-   ALIX_SMOKE=1 pnpm run smoke
-   ```
-
-### What Changed?
-
-- ✅ **Dependencies upgraded** to latest compatible versions:
-  - `puppeteer`: Updated to v24.34.0
-  - `cheerio`: Updated to v1.1.2
-  - `node-fetch`: Updated to v3.3.2
-  - `@faker-js/faker`: Updated to v10.2.0
-- ✅ **Improved error handling** with better error messages
-- ✅ **Enhanced reliability** with retry logic for page loading
-- ✅ **API remains the same** - no code changes needed in your project
-
-### Troubleshooting
-
-**Issue: "Cannot find module" or import errors**
-- Make sure you're using Node.js >= 22.0.0
-- Clear `node_modules` and reinstall: `rm -rf node_modules && pnpm install`
-
-**Issue: Puppeteer Chrome not found**
-- Run: `pnpm exec puppeteer browsers install chrome`
-- Or set `PUPPETEER_EXECUTABLE_PATH` to use system Chrome
-
-**Issue: Timeout errors**
-- This is **normal and expected** for web scraping - AliExpress may block automated requests or pages may load slowly
-- The default timeout is now 60 seconds (increased from 30s)
-- You can increase it further in `puppeteerOptions`: `{ timeout: 90000 }` (90 seconds)
-- For smoke tests, set `PUPPETEER_TIMEOUT=90000` environment variable
-- Try with a different product ID if one consistently times out
-- Note: Timeouts don't mean the code is broken - it's a network/anti-bot issue
-
-**Issue: "runParams not found" errors**
-- The improved error handling will now provide clearer messages
-- This usually means the page structure changed or the product is unavailable
-
-### Need Help?
-
-If you encounter issues after upgrading:
-1. Check that Node.js version is >= 22.0.0
-2. Clear cache and reinstall dependencies
-3. Open an issue on GitHub with error details
-
-# How to use?
+## Usage
 
 ```javascript
 import scrape from 'aliexpress-product-scraper';
 
-scrape('1005007429636284', options).then(res => {
-  console.log('Product JSON: ', res);
-});
+const data = await scrape('1005007429636284');
+console.log(data.title, data.salePrice);
 ```
 
-**Parameters:**
-
-- `id` (string, required) - AliExpress Product ID
-- `options` (object, optional):
+### Options
 
 | Option | Type | Default | Description |
 |--------|------|---------|-------------|
@@ -137,44 +38,89 @@ scrape('1005007429636284', options).then(res => {
 | `puppeteerOptions` | object | {} | Puppeteer launch options |
 | `timeout` | number | 60000 | Page navigation timeout (ms) |
 
-# Development
+---
 
-## Linting
+## Upgrading to v3.0.0
 
-This project uses ESLint to enforce code quality. The following rules are enforced:
-- `curly`: All control statements must use curly braces
-- `indent`: 2-space indentation
-- `brace-style`: Consistent 1TBS brace style
+### Breaking Changes
+
+| Change | v2.x | v3.0.0 |
+|--------|------|--------|
+| Node.js | Any | **>= 22.0.0** |
+| AliExpress API | SSR (runParams) | CSR (API interception) |
+| Bot detection | Basic | Stealth plugin |
+
+### Upgrade Steps
 
 ```bash
-# Check for linting errors
-pnpm run lint
+# 1. Check Node.js version (must be >= 22)
+node --version
 
-# Auto-fix linting errors
-pnpm run lint:fix
+# 2. If needed, upgrade Node.js
+nvm install 22 && nvm use 22
+
+# 3. Update the package
+npm update aliexpress-product-scraper
+
+# 4. Verify it works
+node -e "import('aliexpress-product-scraper').then(m => console.log('OK'))"
 ```
+
+### What's New in v3.0.0
+
+- **Node.js 22+ required** - Uses modern ES features
+- **New scraping method** - AliExpress switched to CSR; now intercepts API responses
+- **Stealth mode** - Uses puppeteer-extra-plugin-stealth to avoid bot detection
+- **Better reliability** - Handles dynamic page loading
+- **ESLint + pre-commit hooks** - Code quality enforcement
+- **Same API** - No code changes needed in your project
+
+---
+
+## Troubleshooting
+
+| Issue | Solution |
+|-------|----------|
+| "Cannot find module" | Use Node.js >= 22.0.0 |
+| Puppeteer Chrome not found | Run `npx puppeteer browsers install chrome` |
+| Timeout errors | Increase timeout: `{ timeout: 90000 }` |
+| Empty data | Product may be unavailable or blocked |
+
+---
+
+## Development
+
+```bash
+# Install dependencies
+npm install
+
+# Run linter
+npm run lint
+
+# Auto-fix lint errors  
+npm run lint:fix
+
+# Run smoke test (live scraping test)
+ALIX_SMOKE=1 npm run smoke
+
+# Debug test (verbose output + screenshot)
+node scripts/debug-test.js
+```
+
+### Scripts
+
+| Script | Description |
+|--------|-------------|
+| `npm run lint` | Check code quality |
+| `npm run lint:fix` | Auto-fix lint errors |
+| `npm run smoke` | Live scraping test (requires `ALIX_SMOKE=1`) |
+| `node scripts/debug-test.js` | Diagnostic tool with verbose output |
 
 A pre-commit hook automatically runs ESLint on staged files.
 
-# Smoke test (optional)
-Run this only when you want to verify live scraping:
-```bash
-# Using pnpm
-ALIX_SMOKE=1 pnpm run smoke
+---
 
-# Or using npm
-ALIX_SMOKE=1 npm run smoke
-
-# With custom timeout (if you get timeout errors)
-ALIX_SMOKE=1 PUPPETEER_TIMEOUT=90000 pnpm run smoke
-
-# With custom product ID
-ALIX_SMOKE=1 ALIX_PRODUCT_ID=1005001234567890 pnpm run smoke
-```
-
-**Note:** Timeout errors during smoke tests are normal - AliExpress may block automated requests. This doesn't mean the code is broken.
-
-# Sample JSON Response
+## Sample Response
 
 ```json
 {
