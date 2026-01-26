@@ -1,14 +1,18 @@
 const getShippingData = (shippingData) => {
-  const shippingOptions = shippingData?.map((shippingOption) => {
+  if (!shippingData || !Array.isArray(shippingData)) {
+    return [];
+  }
+
+  const shippingOptions = shippingData.map((shippingOption) => {
+    const bizData = shippingOption?.bizData || {};
+    
+    // Handle both old and new API formats
     const {
+      // Old format fields
       deliveryProviderName,
       tracking,
       provider,
       company,
-      shipFrom,
-      shipFromCode,
-      shipTo,
-      shipToCode,
       deliveryDayMax,
       deliveryDayMin,
       composeEtaMixDate,
@@ -18,29 +22,38 @@ const getShippingData = (shippingData) => {
       displayAmount,
       displayCurrency,
       warehouseType,
-    } = shippingOption?.bizData || {};
+      // New format fields
+      shipFrom,
+      shipFromCode,
+      shipTo,
+      shipToCode,
+      freightCommitDay,
+      unreachable,
+      itemScene,
+    } = bizData;
 
     const hasShippingFee = shippingFee === "charge";
 
     const returnData = {
-      deliveryProviderName,
-      tracking,
-      provider,
-      company,
+      deliveryProviderName: deliveryProviderName || itemScene || null,
+      tracking: tracking || null,
+      provider: provider || null,
+      company: company || null,
       deliveryInfo: {
-        min: deliveryDayMin,
-        max: deliveryDayMax,
-        displayMin: composeEtaMixDate,
-        displayMan: composeEtaMaxDate,
+        min: deliveryDayMin || (freightCommitDay ? parseInt(freightCommitDay) : null),
+        max: deliveryDayMax || (freightCommitDay ? parseInt(freightCommitDay) : null),
+        displayMin: composeEtaMixDate || null,
+        displayMax: composeEtaMaxDate || null,
       },
       shippingInfo: {
-        from: shipFrom,
-        fromCode: shipFromCode,
-        to: shipTo,
-        toCode: shipToCode,
+        from: shipFrom || null,
+        fromCode: shipFromCode || null,
+        to: shipTo || null,
+        toCode: shipToCode || null,
         fees: hasShippingFee ? formattedAmount : 0,
+        unreachable: unreachable || false,
       },
-      warehouseType,
+      warehouseType: warehouseType || null,
     };
 
     if (hasShippingFee) {

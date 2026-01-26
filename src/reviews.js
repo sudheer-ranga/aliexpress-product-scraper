@@ -41,19 +41,45 @@ const get = async ({ productId, total, limit, filterReviewsBy = "all" }) => {
 
   for (let currentPage = 1; currentPage <= totalPages; currentPage++) {
     const reviewUrl = `https://feedback.aliexpress.com/pc/searchEvaluation.do?productId=${productId}&page=${currentPage}&pageSize=${COUNT_PER_PAGE}&filter=${filterReviewsBy}`;
-    const review = await fetch(reviewUrl);
-    const reviewJson = await review.json();
+    
+    try {
+      const review = await fetch(reviewUrl);
+      
+      if (!review.ok) {
+        console.warn(
+          `Failed to fetch reviews page ${currentPage} for product ${productId}: ` +
+          `HTTP ${review.status} ${review.statusText}`
+        );
+        break; // Stop fetching if we get an error
+      }
+      
+      const reviewJson = await review.json();
 
-    const reviews = reviewJson?.data?.evaViewList || [];
+      const reviews = reviewJson?.data?.evaViewList || [];
 
-    if (!reviews) {
-      return allReviews;
+      if (!reviews || reviews.length === 0) {
+        // No more reviews available
+        break;
+      }
+
+      reviews.forEach((_review) => {
+        const data = getReview(_review);
+        allReviews.push(data);
+      });
+    } catch (error) {
+      console.warn(
+        `Error fetching reviews page ${currentPage} for product ${productId}:`,
+        error.message
+      );
+      // Continue to next page or break if it's a critical error
+      if (currentPage === 1) {
+        // If first page fails, it's likely a critical issue
+        throw new Error(
+          `Failed to fetch reviews for product ${productId}: ${error.message}`
+        );
+      }
+      break;
     }
-
-    reviews.forEach((_review) => {
-      const data = getReview(_review);
-      allReviews.push(data);
-    });
   }
 
   return allReviews;
