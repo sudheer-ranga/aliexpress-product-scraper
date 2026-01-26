@@ -28,6 +28,35 @@ const parseJsonp = (jsonpStr) => {
 };
 
 /**
+ * Extract sale price from targetSkuPriceInfo
+ * Price can be in warmUpPrice, salePrice object, or parsed from salePriceString
+ */
+const getSalePrice = (priceInfo) => {
+  if (!priceInfo) return null;
+  
+  // Check for warmUpPrice object (used during promotions)
+  if (priceInfo.warmUpPrice) return priceInfo.warmUpPrice;
+  
+  // Check for salePrice object
+  if (priceInfo.salePrice) return priceInfo.salePrice;
+  
+  // Parse from salePriceString (format: "Rs.3,224.17")
+  if (priceInfo.salePriceString) {
+    const match = priceInfo.salePriceString.match(/([^\d]*)([0-9,.]+)/);
+    if (match) {
+      const value = parseFloat(match[2].replace(/,/g, ''));
+      return {
+        currency: priceInfo.originalPrice?.currency || 'USD',
+        formatedAmount: priceInfo.salePriceString,
+        value: value,
+      };
+    }
+  }
+  
+  return null;
+};
+
+/**
  * Build SKU price list from new API format
  * New API uses skuPaths (array) + skuPriceInfoMap (object) instead of skuPriceList
  */
@@ -127,8 +156,9 @@ const extractDataFromApiResponse = (apiData) => {
         maxAmount: result.PRICE?.targetSkuPriceInfo?.originalPrice || result.PRICE?.origPrice?.maxAmount || null,
       },
       discountPrice: {
-        minActivityAmount: result.PRICE?.targetSkuPriceInfo?.warmUpPrice || result.PRICE?.targetSkuPriceInfo?.salePrice || null,
-        maxActivityAmount: result.PRICE?.targetSkuPriceInfo?.warmUpPrice || result.PRICE?.targetSkuPriceInfo?.salePrice || null,
+        // Sale price can be in warmUpPrice, salePrice, or parsed from salePriceString
+        minActivityAmount: getSalePrice(result.PRICE?.targetSkuPriceInfo) || result.PRICE?.discountPrice?.minActivityAmount || null,
+        maxActivityAmount: getSalePrice(result.PRICE?.targetSkuPriceInfo) || result.PRICE?.discountPrice?.maxActivityAmount || null,
       },
     },
     productDescComponent: {
