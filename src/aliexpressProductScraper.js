@@ -33,18 +33,18 @@ const parseJsonp = (jsonpStr) => {
  */
 const getSalePrice = (priceInfo) => {
   if (!priceInfo) {
-return null;
-}
+    return null;
+  }
   
   // Check for warmUpPrice object (used during promotions)
   if (priceInfo.warmUpPrice) {
-return priceInfo.warmUpPrice;
-}
+    return priceInfo.warmUpPrice;
+  }
   
   // Check for salePrice object
   if (priceInfo.salePrice) {
-return priceInfo.salePrice;
-}
+    return priceInfo.salePrice;
+  }
   
   // Parse from salePriceString (format: "Rs.3,224.17")
   if (priceInfo.salePriceString) {
@@ -68,8 +68,8 @@ return priceInfo.salePrice;
  */
 const buildSkuPriceList = (skuPaths, skuPriceInfoMap) => {
   if (!skuPaths || !skuPriceInfoMap) {
-return [];
-}
+    return [];
+  }
   
   // skuPaths is an object with numeric keys
   const pathsArray = Object.values(skuPaths);
@@ -108,8 +108,8 @@ return [];
 const extractDataFromApiResponse = (apiData) => {
   const result = apiData?.data?.result;
   if (!result) {
-return null;
-}
+    return null;
+  }
 
   // Extract global data - note it's nested: GLOBAL_DATA.globalData
   const globalData = result.GLOBAL_DATA?.globalData || {};
@@ -245,8 +245,8 @@ const AliexpressProductScraper = async (
       if (apiData) {
         data = extractDataFromApiResponse(apiData);
         if (data) {
-break;
-}
+          break;
+        }
       }
       
       // Also try the traditional runParams approach (for backwards compatibility)

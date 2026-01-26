@@ -28,6 +28,9 @@ export default [
       // Enforce curly braces for all control statements
       "curly": ["error", "all"],
       
+      // Enforce consistent indentation (2 spaces)
+      "indent": ["error", 2, { "SwitchCase": 1 }],
+      
       // Related consistency rules
       "brace-style": ["error", "1tbs", { "allowSingleLine": false }],
       

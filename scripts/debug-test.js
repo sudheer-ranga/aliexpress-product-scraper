@@ -133,8 +133,8 @@ async function debugTest() {
   } catch (error) {
     console.error(`\n❌ Error: ${error.message}`);
     if (browser) {
-await browser.close();
-}
+      await browser.close();
+    }
     return false;
   }
 }
