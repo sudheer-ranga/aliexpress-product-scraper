@@ -32,13 +32,19 @@ const parseJsonp = (jsonpStr) => {
  * Price can be in warmUpPrice, salePrice object, or parsed from salePriceString
  */
 const getSalePrice = (priceInfo) => {
-  if (!priceInfo) return null;
+  if (!priceInfo) {
+return null;
+}
   
   // Check for warmUpPrice object (used during promotions)
-  if (priceInfo.warmUpPrice) return priceInfo.warmUpPrice;
+  if (priceInfo.warmUpPrice) {
+return priceInfo.warmUpPrice;
+}
   
   // Check for salePrice object
-  if (priceInfo.salePrice) return priceInfo.salePrice;
+  if (priceInfo.salePrice) {
+return priceInfo.salePrice;
+}
   
   // Parse from salePriceString (format: "Rs.3,224.17")
   if (priceInfo.salePriceString) {
@@ -61,7 +67,9 @@ const getSalePrice = (priceInfo) => {
  * New API uses skuPaths (array) + skuPriceInfoMap (object) instead of skuPriceList
  */
 const buildSkuPriceList = (skuPaths, skuPriceInfoMap) => {
-  if (!skuPaths || !skuPriceInfoMap) return [];
+  if (!skuPaths || !skuPriceInfoMap) {
+return [];
+}
   
   // skuPaths is an object with numeric keys
   const pathsArray = Object.values(skuPaths);
@@ -99,7 +107,9 @@ const buildSkuPriceList = (skuPaths, skuPriceInfoMap) => {
  */
 const extractDataFromApiResponse = (apiData) => {
   const result = apiData?.data?.result;
-  if (!result) return null;
+  if (!result) {
+return null;
+}
 
   // Extract global data - note it's nested: GLOBAL_DATA.globalData
   const globalData = result.GLOBAL_DATA?.globalData || {};
@@ -213,7 +223,7 @@ const AliexpressProductScraper = async (
               apiData = parsed;
             }
           }
-        } catch (e) {
+        } catch {
           // Ignore parsing errors - some responses may not be valid JSONP
         }
       }
@@ -234,14 +244,16 @@ const AliexpressProductScraper = async (
       // First try to get data from intercepted API
       if (apiData) {
         data = extractDataFromApiResponse(apiData);
-        if (data) break;
+        if (data) {
+break;
+}
       }
       
       // Also try the traditional runParams approach (for backwards compatibility)
       const runParamsData = await page.evaluate(() => {
         try {
           return window.runParams?.data || null;
-        } catch (error) {
+        } catch {
           return null;
         }
       });

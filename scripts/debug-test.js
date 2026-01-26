@@ -69,7 +69,7 @@ async function debugTest() {
               console.log(`   ✅ API response captured (${text.length} bytes)`);
             }
           }
-        } catch (e) {
+        } catch {
           // Ignore parsing errors
         }
       }
@@ -132,7 +132,9 @@ async function debugTest() {
     
   } catch (error) {
     console.error(`\n❌ Error: ${error.message}`);
-    if (browser) await browser.close();
+    if (browser) {
+await browser.close();
+}
     return false;
   }
 }

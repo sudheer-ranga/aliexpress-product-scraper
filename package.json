@@ -6,7 +6,15 @@
   "type": "module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "smoke": "node ./scripts/smoke.js"
+    "smoke": "node ./scripts/smoke.js",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "prepare": "husky"
+  },
+  "lint-staged": {
+    "*.js": [
+      "eslint --fix"
+    ]
   },
   "keywords": [
     "aliexpress",
@@ -38,5 +46,11 @@
     "puppeteer": "24.34.0",
     "puppeteer-extra": "^3.3.6",
     "puppeteer-extra-plugin-stealth": "^2.11.2"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.2",
+    "eslint": "^9.39.2",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.2.7"
   }
 }
