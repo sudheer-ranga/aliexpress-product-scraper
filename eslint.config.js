@@ -1,7 +1,9 @@
 import js from "@eslint/js";
+import prettier from "eslint-config-prettier";
 
 export default [
   js.configs.recommended,
+  prettier,
   {
     languageOptions: {
       ecmaVersion: 2022,
@@ -26,26 +28,26 @@ export default [
     },
     rules: {
       // Enforce curly braces for all control statements
-      "curly": ["error", "all"],
-      
+      curly: ["error", "all"],
+
       // Enforce consistent indentation (2 spaces)
-      "indent": ["error", 2, { "SwitchCase": 1 }],
-      
+      indent: ["error", 2, { SwitchCase: 1 }],
+
       // Related consistency rules
-      "brace-style": ["error", "1tbs", { "allowSingleLine": false }],
-      
+      "brace-style": ["error", "1tbs", { allowSingleLine: false }],
+
       // Allow unused vars with underscore prefix (for intentionally unused)
-      "no-unused-vars": ["error", { 
-        "argsIgnorePattern": "^_",
-        "varsIgnorePattern": "^_"
-      }],
+      "no-unused-vars": [
+        "error",
+        {
+          argsIgnorePattern: "^_",
+          varsIgnorePattern: "^_",
+        },
+      ],
     },
   },
   {
     // Ignore patterns
-    ignores: [
-      "node_modules/**",
-      "pnpm-lock.yaml",
-    ],
+    ignores: ["node_modules/**", "pnpm-lock.yaml"],
   },
 ];

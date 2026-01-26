@@ -1,7 +1,7 @@
 /**
  * Debug test script to diagnose scraping issues.
  * Run with: node scripts/debug-test.js
- * 
+ *
  * Note: AliExpress now uses CSR (Client-Side Rendering).
  * Data is loaded via API, not embedded in window.runParams.
  * The main scraper intercepts the API response to get product data.
@@ -35,7 +35,7 @@ const parseJsonp = (jsonpStr) => {
 
 async function debugTest() {
   let browser;
-  
+
   try {
     console.log("1. Launching browser...");
     browser = await puppeteer.launch({
@@ -57,9 +57,9 @@ async function debugTest() {
 
     // Set up API response interception (this is how the main scraper works)
     let apiData = null;
-    page.on('response', async (response) => {
+    page.on("response", async (response) => {
       const url = response.url();
-      if (url.includes('mtop.aliexpress') && url.includes('pdp')) {
+      if (url.includes("mtop.aliexpress") && url.includes("pdp")) {
         try {
           const text = await response.text();
           if (text && text.length > 1000) {
@@ -77,7 +77,7 @@ async function debugTest() {
 
     const url = `https://www.aliexpress.com/item/${productId}.html`;
     console.log(`2. Navigating to: ${url}`);
-    
+
     const startTime = Date.now();
     await page.goto(url, {
       waitUntil: "networkidle2",
@@ -90,21 +90,21 @@ async function debugTest() {
     console.log("3. Waiting for API data...");
     const maxWait = 10000;
     const waitStart = Date.now();
-    while (!apiData && (Date.now() - waitStart) < maxWait) {
-      await new Promise(r => setTimeout(r, 500));
+    while (!apiData && Date.now() - waitStart < maxWait) {
+      await new Promise((r) => setTimeout(r, 500));
     }
 
     if (apiData) {
       const result = apiData.data.result;
       const globalData = result.GLOBAL_DATA?.globalData || {};
-      
+
       console.log("4. ✅ Product data extracted successfully!");
       console.log(`   Title: ${result.PRODUCT_TITLE?.text || globalData.subject}`);
       console.log(`   Product ID: ${globalData.productId}`);
       console.log(`   Images: ${result.HEADER_IMAGE_PC?.imagePathList?.length || 0}`);
-      console.log(`   Rating: ${result.PC_RATING?.rating || 'N/A'}`);
+      console.log(`   Rating: ${result.PC_RATING?.rating || "N/A"}`);
       console.log(`   Store: ${globalData.storeName}`);
-      
+
       console.log("\n🎉 SUCCESS! The scraper should work with this product.");
     } else {
       console.log("4. ❌ API data not captured");
@@ -112,13 +112,13 @@ async function debugTest() {
       console.log("   - Network issues");
       console.log("   - AliExpress blocking automated access");
       console.log("   - Rate limiting");
-      
+
       // Check page state
       const pageTitle = await page.title();
       console.log(`\n   Page title: "${pageTitle}"`);
-      
+
       const bodyText = await page.evaluate(() => document.body.innerText.substring(0, 200));
-      console.log(`   Body preview: ${bodyText.replace(/\n/g, ' ')}...`);
+      console.log(`   Body preview: ${bodyText.replace(/\n/g, " ")}...`);
     }
 
     // Take screenshot
@@ -127,9 +127,8 @@ async function debugTest() {
 
     await browser.close();
     console.log("✅ Browser closed");
-    
+
     return !!apiData;
-    
   } catch (error) {
     console.error(`\n❌ Error: ${error.message}`);
     if (browser) {

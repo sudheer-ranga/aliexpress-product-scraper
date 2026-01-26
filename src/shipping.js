@@ -5,7 +5,7 @@ const getShippingData = (shippingData) => {
 
   const shippingOptions = shippingData.map((shippingOption) => {
     const bizData = shippingOption?.bizData || {};
-    
+
     // Handle both old and new API formats
     const {
       // Old format fields
