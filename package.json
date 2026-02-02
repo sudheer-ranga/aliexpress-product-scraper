@@ -41,9 +41,9 @@
   },
   "dependencies": {
     "@faker-js/faker": "10.2.0",
-    "cheerio": "1.1.2",
+    "cheerio": "1.2.0",
     "node-fetch": "3.3.2",
-    "puppeteer": "24.34.0",
+    "puppeteer": "24.36.1",
     "puppeteer-extra": "^3.3.6",
     "puppeteer-extra-plugin-stealth": "^2.11.2"
   },
