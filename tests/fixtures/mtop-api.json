@@ -1,0 +1,125 @@
+{
+  "data": {
+    "result": {
+      "GLOBAL_DATA": {
+        "globalData": {
+          "subject": "Test Product",
+          "categoryId": 123,
+          "productId": 999,
+          "sales": "42",
+          "storeName": "Test Store",
+          "sellerId": 456,
+          "storeId": 789,
+          "currencyCode": "USD"
+        }
+      },
+      "PRODUCT_TITLE": {
+        "text": "Test Product"
+      },
+      "QUANTITY_PC": {
+        "totalAvailableInventory": 7
+      },
+      "SHOP_CARD_PC": {
+        "storeName": "Test Store",
+        "logo": "https://example.com/logo.png",
+        "topRatedSeller": true,
+        "positiveNum": 120,
+        "positiveRate": "98.5"
+      },
+      "PC_RATING": {
+        "rating": "4.8",
+        "totalValidNum": 12
+      },
+      "HEADER_IMAGE_PC": {
+        "imagePathList": [
+          "https://example.com/img1.png",
+          "https://example.com/img2.png"
+        ]
+      },
+      "SKU": {
+        "skuProperties": [
+          {
+            "skuPropertyId": 14,
+            "skuPropertyName": "Color",
+            "skuPropertyValues": [
+              {
+                "propertyValueIdLong": 1,
+                "propertyValueName": "Red",
+                "propertyValueDisplayName": "Red",
+                "skuPropertyImagePath": "https://example.com/red.png"
+              }
+            ]
+          }
+        ],
+        "skuPaths": {
+          "0": {
+            "skuId": 100,
+            "skuIdStr": "100",
+            "path": "14:1",
+            "skuStock": 7
+          }
+        }
+      },
+      "PRICE": {
+        "skuPriceInfoMap": {
+          "100": {
+            "originalPrice": {
+              "currency": "USD",
+              "formatedAmount": "$10.00",
+              "value": 10
+            },
+            "salePrice": {
+              "currency": "USD",
+              "formatedAmount": "$8.00",
+              "value": 8
+            }
+          }
+        },
+        "targetSkuPriceInfo": {
+          "originalPrice": {
+            "currency": "USD",
+            "formatedAmount": "$10.00",
+            "value": 10
+          },
+          "salePrice": {
+            "currency": "USD",
+            "formatedAmount": "$8.00",
+            "value": 8
+          }
+        }
+      },
+      "DESC": {
+        "pcDescUrl": "https://example.com/desc"
+      },
+      "SHIPPING": {
+        "originalLayoutResultList": [
+          {
+            "bizData": {
+              "deliveryProviderName": "UPS",
+              "tracking": "Y",
+              "provider": "UPS",
+              "company": "UPS",
+              "deliveryDayMax": 10,
+              "deliveryDayMin": 5,
+              "composeEtaMixDate": "2026-02-10",
+              "composeEtaMaxDate": "2026-02-15",
+              "shippingFee": "free",
+              "formattedAmount": "$0.00",
+              "displayAmount": "$0.00",
+              "displayCurrency": "USD",
+              "warehouseType": "CN"
+            }
+          }
+        ]
+      },
+      "PRODUCT_PROP_PC": {
+        "showedProps": [
+          {
+            "attrName": "Material",
+            "attrValue": "Plastic"
+          }
+        ]
+      }
+    }
+  }
+}
