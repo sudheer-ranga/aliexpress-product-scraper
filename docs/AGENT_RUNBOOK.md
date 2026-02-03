@@ -1,11 +1,11 @@
 # Agent Runbook
 
 ## Setup
-- Use Node 22+ (project uses .nvmrc)
+- Use Node 24+ (standardize on 24)
 - Use pnpm
 
 ```bash
-nvm use
+nvm use 24
 pnpm install
 npx puppeteer browsers install chrome
 ```
@@ -35,4 +35,3 @@ git worktree add ../aliexpress-product-scraper-test-harness codex/test-harness
 ## Notes
 - E2E smoke is live network; keep it opt-in.
 - Do not change default behavior without an explicit opt-in option.
-

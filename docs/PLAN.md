@@ -3,7 +3,7 @@
 ## Principles
 - Backward compatibility: default behavior and output shape must not change.
 - Additive options only; new behavior is opt-in.
-- Node 22+ support.
+- Node 24+ support.
 - Tests protect output contracts and reduce regressions.
 
 ## How to use this plan
@@ -29,7 +29,7 @@ Deliverables:
 - Unit tests for helpers (node:test)
 - Integration tests with fixtures (no network)
 - Contract tests to lock output shape for fixtures
-- GitHub Actions CI: lint + unit + integration (Node 22 and Node 24)
+- GitHub Actions CI: lint + unit + integration (Node 24)
 - Agent scripts: scripts/agent-setup.sh and scripts/agent-check.sh
 Notes:
 - E2E smoke remains opt-in via ALIX_SMOKE=1.
@@ -73,4 +73,3 @@ Notes:
 - Keep work scoped to the phase.
 - Run scripts/agent-check.sh before opening PRs (added in Phase 1).
 - Avoid manual steps; codify them in scripts.
-
