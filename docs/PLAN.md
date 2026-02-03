@@ -23,7 +23,7 @@ Notes:
 - Keep the plan updated after each PR merge.
 
 ### Phase 1 (codex/test-harness) - Tests + CI safety net
-Status: [ ]
+Status: [~]
 Deliverables:
 - Extract pure helpers (parseJsonp, extractDataFromApiResponse, buildSkuPriceList, getSalePrice)
 - Unit tests for helpers (node:test)
@@ -33,6 +33,7 @@ Deliverables:
 - Agent scripts: scripts/agent-setup.sh and scripts/agent-check.sh
 Notes:
 - E2E smoke remains opt-in via ALIX_SMOKE=1.
+- Progress: PR #57 open (test harness + CI). Tests: pnpm run test (Node 24) passed.
 
 ### Phase 2 (codex/ux-perf) - Non-breaking UX + performance
 Status: [ ]
