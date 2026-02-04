@@ -11,7 +11,7 @@ Scrapes AliExpress product information and returns JSON data including:
 
 ## Requirements
 
-- **Node.js >= 22.0.0** (required)
+- **Node.js >= 24.0.0** (required)
 - npm or pnpm
 
 ## Installation
@@ -46,18 +46,18 @@ console.log(data.title, data.salePrice);
 
 | Change | v2.x | v3.0.0 |
 |--------|------|--------|
-| Node.js | Any | **>= 22.0.0** |
+| Node.js | Any | **>= 24.0.0** |
 | AliExpress API | SSR (runParams) | CSR (API interception) |
 | Bot detection | Basic | Stealth plugin |
 
 ### Upgrade Steps
 
 ```bash
-# 1. Check Node.js version (must be >= 22)
+# 1. Check Node.js version (must be >= 24)
 node --version
 
 # 2. If needed, upgrade Node.js
-nvm install 22 && nvm use 22
+nvm install 24 && nvm use 24
 
 # 3. Update the package
 npm update aliexpress-product-scraper
@@ -68,7 +68,7 @@ node -e "import('aliexpress-product-scraper').then(m => console.log('OK'))"
 
 ### What's New in v3.0.0
 
-- **Node.js 22+ required** - Uses modern ES features
+- **Node.js 24+ required** - Uses modern ES features
 - **New scraping method** - AliExpress switched to CSR; now intercepts API responses
 - **Stealth mode** - Uses puppeteer-extra-plugin-stealth to avoid bot detection
 - **Better reliability** - Handles dynamic page loading
@@ -81,7 +81,7 @@ node -e "import('aliexpress-product-scraper').then(m => console.log('OK'))"
 
 | Issue | Solution |
 |-------|----------|
-| "Cannot find module" | Use Node.js >= 22.0.0 |
+| "Cannot find module" | Use Node.js >= 24.0.0 |
 | Puppeteer Chrome not found | Run `npx puppeteer browsers install chrome` |
 | Timeout errors | Increase timeout: `{ timeout: 90000 }` |
 | Empty data | Product may be unavailable or blocked |
