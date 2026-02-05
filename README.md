@@ -48,6 +48,8 @@ console.log(data.title, data.salePrice);
 |--------|------|--------|
 | Node.js | **>= 22.0.0** | **>= 24.0.0** |
 | Package version | `3.x` | `4.x` |
+| AliExpress API | SSR (runParams) | CSR (API interception) |
+| Bot detection | Basic | Stealth plugin |
 | Runtime API | Current | No response shape changes |
 
 ### Upgrade Steps
@@ -82,6 +84,14 @@ pnpm install --frozen-lockfile
 pnpm run lint
 pnpm run test
 ```
+
+Key v4 updates:
+- **Node.js 24+ required** - Uses modern ES features
+- **New scraping method** - AliExpress switched to CSR; now intercepts API responses
+- **Stealth mode** - Uses puppeteer-extra-plugin-stealth to avoid bot detection
+- **Better reliability** - Handles dynamic page loading
+- **ESLint + pre-commit hooks** - Code quality enforcement
+- **Same API** - No code changes needed in your project
 
 ---
 
