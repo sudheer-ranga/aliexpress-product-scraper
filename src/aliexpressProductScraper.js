@@ -5,18 +5,46 @@ import * as cheerio from "cheerio";
 import { get as GetReviews } from "./reviews.js";
 import { parseJsonp, extractDataFromApiResponse } from "./parsers.js";
 import { buildProductJson } from "./transform.js";
+import { normalizeProductId } from "./input.js";
+import { normalizeFields, shouldFetchField, pickFields } from "./fields.js";
 
 // Use stealth plugin to avoid bot detection
 puppeteer.use(StealthPlugin());
 
+const FAST_MODE_BLOCKED_RESOURCE_TYPES = new Set([
+  "image",
+  "media",
+  "font",
+  "stylesheet",
+]);
 
 const AliexpressProductScraper = async (
-  id,
-  { reviewsCount = 20, filterReviewsBy = "all", puppeteerOptions = {}, timeout = 60000 } = {}
+  idOrUrl,
+  {
+    reviewsCount = 20,
+    filterReviewsBy = "all",
+    puppeteerOptions = {},
+    timeout = 60000,
+    fastMode = false,
+    fields = null,
+  } = {}
 ) => {
-  if (!id) {
+  if (!idOrUrl) {
     throw new Error("Please provide a valid product id");
   }
+
+  const id = normalizeProductId(idOrUrl);
+  const selectedFields = normalizeFields(fields);
+  const shouldFetchDescription = shouldFetchField({
+    fields: selectedFields,
+    field: "description",
+    fastMode,
+  });
+  const shouldFetchReviews = shouldFetchField({
+    fields: selectedFields,
+    field: "reviews",
+    fastMode,
+  });
 
   let browser;
 
@@ -28,14 +56,25 @@ const AliexpressProductScraper = async (
     });
     const page = await browser.newPage();
 
+    if (fastMode) {
+      await page.setRequestInterception(true);
+      page.on("request", (request) => {
+        if (FAST_MODE_BLOCKED_RESOURCE_TYPES.has(request.resourceType())) {
+          request.abort();
+          return;
+        }
+        request.continue();
+      });
+    }
+
     // Set up response interception to capture the product data API
     // AliExpress uses CSR (Client-Side Rendering) and loads data via mtop API
     let apiData = null;
-    
-    page.on('response', async (response) => {
+
+    page.on("response", async (response) => {
       const url = response.url();
       // Capture the product detail API response
-      if (url.includes('mtop.aliexpress') && url.includes('pdp')) {
+      if (url.includes("mtop.aliexpress") && url.includes("pdp")) {
         try {
           const text = await response.text();
           if (text && text.length > 1000) {
@@ -60,7 +99,7 @@ const AliexpressProductScraper = async (
     let data = null;
     const maxWaitTime = 15000; // 15 seconds max
     const startTime = Date.now();
-    
+
     while (!data && (Date.now() - startTime) < maxWaitTime) {
       // First try to get data from intercepted API
       if (apiData) {
@@ -69,7 +108,7 @@ const AliexpressProductScraper = async (
           break;
         }
       }
-      
+
       // Also try the traditional runParams approach (for backwards compatibility)
       const runParamsData = await page.evaluate(() => {
         try {
@@ -78,12 +117,12 @@ const AliexpressProductScraper = async (
           return null;
         }
       });
-      
+
       if (runParamsData && Object.keys(runParamsData).length > 0) {
         data = runParamsData;
         break;
       }
-      
+
       await new Promise((resolve) => setTimeout(resolve, 500));
     }
 
@@ -97,8 +136,8 @@ const AliexpressProductScraper = async (
 
     /** Scrape the description page for the product using the description url */
     const descriptionUrl = data?.productDescComponent?.descriptionUrl;
-    let descriptionDataPromise = null;
-    if (descriptionUrl) {
+    let descriptionDataPromise = Promise.resolve(null);
+    if (shouldFetchDescription && descriptionUrl) {
       descriptionDataPromise = page.goto(descriptionUrl).then(async () => {
         const descriptionPageHtml = await page.content();
         const $ = cheerio.load(descriptionPageHtml);
@@ -106,12 +145,15 @@ const AliexpressProductScraper = async (
       });
     }
 
-    const reviewsPromise = GetReviews({
-      productId: id,
-      limit: REVIEWS_COUNT,
-      total: data.feedbackComponent?.totalValidNum || 0,
-      filterReviewsBy,
-    });
+    let reviewsPromise = Promise.resolve([]);
+    if (shouldFetchReviews) {
+      reviewsPromise = GetReviews({
+        productId: id,
+        limit: REVIEWS_COUNT,
+        total: data.feedbackComponent?.totalValidNum || 0,
+        filterReviewsBy,
+      });
+    }
 
     const [descriptionData, reviews] = await Promise.all([
       descriptionDataPromise,
@@ -120,7 +162,8 @@ const AliexpressProductScraper = async (
 
     await browser.close();
 
-    return buildProductJson({ data, descriptionData, reviews });
+    const productJson = buildProductJson({ data, descriptionData, reviews });
+    return pickFields(productJson, selectedFields);
   } catch (error) {
     console.error(error);
     if (browser) {
