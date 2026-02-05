@@ -3,6 +3,8 @@ node_modules
 .codex
 .DS_Store
 .idea
+.codex
+.pnpm-store
 
 # Debug/test artifacts
 debug-screenshot.png
