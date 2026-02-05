@@ -6,34 +6,11 @@
 - Node 24+ support.
 - Tests protect output contracts and reduce regressions.
 
-## How to use this plan
-- Each phase maps to a branch and PR (prefix: codex/).
-- Update status checkboxes as work completes.
-- Record decisions and follow-ups in the Notes section of each phase.
+## Completed
+- Phase 0 (codex/plan): planning docs and baseline workflow updates.
+- Phase 1 (codex/test-harness): helper extraction, unit/integration/contract tests, and Node 24 CI.
 
-## Milestones
-
-### Phase 0 (codex/plan) - Plan + runbook
-Status: [x]
-Deliverables:
-- docs/PLAN.md (this file)
-- docs/AGENT_RUNBOOK.md
-- .gitignore updates for local artifacts
-Notes:
-- Keep the plan updated after each PR merge.
-
-### Phase 1 (codex/test-harness) - Tests + CI safety net
-Status: [~]
-Deliverables:
-- Extract pure helpers (parseJsonp, extractDataFromApiResponse, buildSkuPriceList, getSalePrice)
-- Unit tests for helpers (node:test)
-- Integration tests with fixtures (no network)
-- Contract tests to lock output shape for fixtures
-- GitHub Actions CI: lint + unit + integration (Node 24)
-- Agent scripts: scripts/agent-setup.sh and scripts/agent-check.sh
-Notes:
-- E2E smoke remains opt-in via ALIX_SMOKE=1.
-- Progress: PR #57 open (test harness + CI). Tests: pnpm run test (Node 24) passed.
+## Remaining milestones
 
 ### Phase 2 (codex/ux-perf) - Non-breaking UX + performance
 Status: [ ]
@@ -42,7 +19,7 @@ Deliverables:
 - Optional browser injection to reuse a Puppeteer instance
 - fastMode option (skip description/reviews, block heavy resources)
 - Better error taxonomy (invalid ID vs blocked vs timeout)
-- Remove node-fetch (use native fetch in Node 22+)
+- Remove node-fetch (use native fetch in Node 24+)
 Notes:
 - All new behavior opt-in; defaults stay the same.
 
@@ -72,5 +49,4 @@ Notes:
 ## Agent workflow (Codex + Ralph loop)
 - One branch per PR, one worktree per agent.
 - Keep work scoped to the phase.
-- Run scripts/agent-check.sh before opening PRs (added in Phase 1).
-- Avoid manual steps; codify them in scripts.
+- Prefer project scripts/workflows over ad-hoc local shell scripts.

@@ -1,0 +1,125 @@
+{
+  "title": "Test Product",
+  "categoryId": 123,
+  "productId": 999,
+  "quantity": {
+    "total": 7,
+    "available": 7
+  },
+  "description": "<p>desc</p>",
+  "orders": "42",
+  "storeInfo": {
+    "name": "Test Store",
+    "logo": "https://example.com/logo.png",
+    "companyId": 456,
+    "storeNumber": 789,
+    "isTopRated": true,
+    "hasPayPalAccount": false,
+    "ratingCount": 120,
+    "rating": "98.5"
+  },
+  "ratings": {
+    "totalStar": 5,
+    "averageStar": "4.8",
+    "totalStartCount": 12,
+    "fiveStarCount": 0,
+    "fourStarCount": 0,
+    "threeStarCount": 0,
+    "twoStarCount": 0,
+    "oneStarCount": 0
+  },
+  "images": [
+    "https://example.com/img1.png",
+    "https://example.com/img2.png"
+  ],
+  "reviews": [],
+  "variants": {
+    "options": [
+      {
+        "id": 14,
+        "name": "Color",
+        "values": [
+          {
+            "id": 1,
+            "name": "Red",
+            "displayName": "Red",
+            "image": "https://example.com/red.png"
+          }
+        ]
+      }
+    ],
+    "prices": [
+      {
+        "skuId": 100,
+        "optionValueIds": "14:1",
+        "availableQuantity": 7,
+        "originalPrice": {
+          "currency": "USD",
+          "formatedAmount": "$10.00",
+          "value": 10
+        },
+        "salePrice": {
+          "currency": "USD",
+          "formatedAmount": "$8.00",
+          "value": 8
+        }
+      }
+    ]
+  },
+  "specs": [
+    {
+      "attrName": "Material",
+      "attrValue": "Plastic"
+    }
+  ],
+  "currencyInfo": {
+    "currencyCode": "USD"
+  },
+  "originalPrice": {
+    "min": {
+      "currency": "USD",
+      "formatedAmount": "$10.00",
+      "value": 10
+    },
+    "max": {
+      "currency": "USD",
+      "formatedAmount": "$10.00",
+      "value": 10
+    }
+  },
+  "salePrice": {
+    "min": {
+      "currency": "USD",
+      "formatedAmount": "$8.00",
+      "value": 8
+    },
+    "max": {
+      "currency": "USD",
+      "formatedAmount": "$8.00",
+      "value": 8
+    }
+  },
+  "shipping": [
+    {
+      "deliveryProviderName": "UPS",
+      "tracking": "Y",
+      "provider": "UPS",
+      "company": "UPS",
+      "deliveryInfo": {
+        "min": 5,
+        "max": 10,
+        "displayMin": "2026-02-10",
+        "displayMax": "2026-02-15"
+      },
+      "shippingInfo": {
+        "from": null,
+        "fromCode": null,
+        "to": null,
+        "toCode": null,
+        "fees": 0,
+        "unreachable": false
+      },
+      "warehouseType": "CN"
+    }
+  ]
+}
