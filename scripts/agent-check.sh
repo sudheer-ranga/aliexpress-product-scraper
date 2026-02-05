@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-pnpm run lint
-pnpm run test
+corepack pnpm run lint
+corepack pnpm run test

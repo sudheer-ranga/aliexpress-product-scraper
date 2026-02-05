@@ -1,4 +1,6 @@
 node_modules
+.pnpm-store
+.codex
 .DS_Store
 .idea
 

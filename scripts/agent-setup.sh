@@ -9,5 +9,6 @@ else
   echo "nvm not found; ensure Node 24 is active." >&2
 fi
 
-pnpm install
-npx puppeteer browsers install chrome
+corepack enable
+corepack pnpm install --frozen-lockfile
+corepack pnpm exec puppeteer browsers install chrome

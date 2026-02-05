@@ -11,7 +11,7 @@ Scrapes AliExpress product information and returns JSON data including:
 
 ## Requirements
 
-- **Node.js >= 22.0.0** (required)
+- **Node.js >= 24.0.0** (required)
 - npm or pnpm
 
 ## Installation
@@ -40,40 +40,48 @@ console.log(data.title, data.salePrice);
 
 ---
 
-## Upgrading to v3.0.0
+## Upgrading to v4.0.0
 
 ### Breaking Changes
 
-| Change | v2.x | v3.0.0 |
+| Change | v3.x | v4.0.0 |
 |--------|------|--------|
-| Node.js | Any | **>= 22.0.0** |
-| AliExpress API | SSR (runParams) | CSR (API interception) |
-| Bot detection | Basic | Stealth plugin |
+| Node.js | **>= 22.0.0** | **>= 24.0.0** |
+| Package version | `3.x` | `4.x` |
+| Runtime API | Current | No response shape changes |
 
 ### Upgrade Steps
 
 ```bash
-# 1. Check Node.js version (must be >= 22)
+# 1. Check Node.js version (must be >= 24)
 node --version
 
 # 2. If needed, upgrade Node.js
-nvm install 22 && nvm use 22
+nvm install 24 && nvm use 24
 
-# 3. Update the package
-npm update aliexpress-product-scraper
+# 3. Use pnpm through corepack (recommended for contributors)
+corepack enable
 
-# 4. Verify it works
+# 4. Update the package
+npm install aliexpress-product-scraper@latest
+
+# 5. Verify it works
 node -e "import('aliexpress-product-scraper').then(m => console.log('OK'))"
 ```
 
-### What's New in v3.0.0
+### Developer Setup (v4)
 
-- **Node.js 22+ required** - Uses modern ES features
-- **New scraping method** - AliExpress switched to CSR; now intercepts API responses
-- **Stealth mode** - Uses puppeteer-extra-plugin-stealth to avoid bot detection
-- **Better reliability** - Handles dynamic page loading
-- **ESLint + pre-commit hooks** - Code quality enforcement
-- **Same API** - No code changes needed in your project
+```bash
+# Use Node 24
+nvm install 24 && nvm use 24
+
+# Install dependencies
+pnpm install --frozen-lockfile
+
+# Validate
+pnpm run lint
+pnpm run test
+```
 
 ---
 
@@ -81,7 +89,7 @@ node -e "import('aliexpress-product-scraper').then(m => console.log('OK'))"
 
 | Issue | Solution |
 |-------|----------|
-| "Cannot find module" | Use Node.js >= 22.0.0 |
+| "Cannot find module" | Use Node.js >= 24.0.0 |
 | Puppeteer Chrome not found | Run `npx puppeteer browsers install chrome` |
 | Timeout errors | Increase timeout: `{ timeout: 90000 }` |
 | Empty data | Product may be unavailable or blocked |
@@ -92,16 +100,19 @@ node -e "import('aliexpress-product-scraper').then(m => console.log('OK'))"
 
 ```bash
 # Install dependencies
-npm install
+pnpm install
 
 # Run linter
-npm run lint
+pnpm run lint
 
 # Auto-fix lint errors  
-npm run lint:fix
+pnpm run lint:fix
+
+# Run tests
+pnpm run test
 
 # Run smoke test (live scraping test)
-ALIX_SMOKE=1 npm run smoke
+ALIX_SMOKE=1 pnpm run smoke
 
 # Debug test (verbose output + screenshot)
 node scripts/debug-test.js
@@ -111,9 +122,10 @@ node scripts/debug-test.js
 
 | Script | Description |
 |--------|-------------|
-| `npm run lint` | Check code quality |
-| `npm run lint:fix` | Auto-fix lint errors |
-| `npm run smoke` | Live scraping test (requires `ALIX_SMOKE=1`) |
+| `pnpm run lint` | Check code quality |
+| `pnpm run lint:fix` | Auto-fix lint errors |
+| `pnpm run test` | Run unit + integration tests |
+| `pnpm run smoke` | Live scraping test (requires `ALIX_SMOKE=1`) |
 | `node scripts/debug-test.js` | Diagnostic tool with verbose output |
 
 A pre-commit hook automatically runs ESLint on staged files.
