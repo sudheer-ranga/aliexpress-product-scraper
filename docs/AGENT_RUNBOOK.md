@@ -13,14 +13,8 @@ npx puppeteer browsers install chrome
 ## Current checks
 ```bash
 pnpm run lint
-ALIX_SMOKE=1 pnpm run smoke
-```
-
-## Coming in Phase 1 (codex/test-harness)
-These will be added with fixtures and helper tests:
-```bash
 pnpm run test
-pnpm run test:integration
+ALIX_SMOKE=1 pnpm run smoke
 ```
 
 ## Ralph loop / parallel agents
