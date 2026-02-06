@@ -8,20 +8,38 @@ const makeTimeoutError = (input, itemTimeout, attempt) => {
   return error;
 };
 
-const withItemTimeout = async (promise, input, itemTimeout, attempt) => {
+const runAttemptWithTimeout = async ({
+  scrapeFn,
+  input,
+  scrapeOptions,
+  itemTimeout,
+  attempt,
+}) => {
+  const controller = new AbortController();
+  const attemptOptions = {
+    ...scrapeOptions,
+    signal: controller.signal,
+  };
+
+  const scrapePromise = Promise.resolve().then(() =>
+    scrapeFn(input, attemptOptions)
+  );
+
   if (!itemTimeout) {
-    return promise;
+    return scrapePromise;
   }
 
   let timeoutId;
   const timeoutPromise = new Promise((_, reject) => {
     timeoutId = setTimeout(() => {
-      reject(makeTimeoutError(input, itemTimeout, attempt));
+      const timeoutError = makeTimeoutError(input, itemTimeout, attempt);
+      controller.abort(timeoutError);
+      reject(timeoutError);
     }, itemTimeout);
   });
 
   try {
-    return await Promise.race([promise, timeoutPromise]);
+    return await Promise.race([scrapePromise, timeoutPromise]);
   } finally {
     clearTimeout(timeoutId);
   }
@@ -86,6 +104,7 @@ const createScrapeMany = (scrapeFn = scrape) => {
     let completed = 0;
     let succeeded = 0;
     let failed = 0;
+    let progressCallbackErrors = 0;
 
     const runSingle = async (input, index) => {
       const itemStartedAt = Date.now();
@@ -93,12 +112,13 @@ const createScrapeMany = (scrapeFn = scrape) => {
 
       for (let attempt = 1; attempt <= retries + 1; attempt++) {
         try {
-          const data = await withItemTimeout(
-            scrapeFn(input, scrapeOptions),
+          const data = await runAttemptWithTimeout({
+            scrapeFn,
             input,
+            scrapeOptions,
             itemTimeout,
-            attempt
-          );
+            attempt,
+          });
 
           return {
             index,
@@ -143,17 +163,21 @@ const createScrapeMany = (scrapeFn = scrape) => {
         }
 
         if (onProgress) {
-          onProgress({
-            completed,
-            total,
-            succeeded,
-            failed,
-            current: {
-              index: currentIndex,
-              input,
-              success: result.success,
-            },
-          });
+          try {
+            onProgress({
+              completed,
+              total,
+              succeeded,
+              failed,
+              current: {
+                index: currentIndex,
+                input,
+                success: result.success,
+              },
+            });
+          } catch {
+            progressCallbackErrors += 1;
+          }
         }
       }
     };
@@ -167,6 +191,7 @@ const createScrapeMany = (scrapeFn = scrape) => {
         total,
         succeeded,
         failed,
+        progressCallbackErrors,
         durationMs: Date.now() - startedAt,
       },
     };

@@ -86,6 +86,16 @@ Batch options:
 - `itemTimeout` (default `120000`): Timeout per batch item in ms
 - `onProgress`: Callback invoked after each completed item
 
+### Stress Testing `scrapeMany`
+
+```bash
+# Default synthetic stress run (1000 items)
+pnpm run test:stress
+
+# Custom scale knobs
+STRESS_ITEMS=5000 STRESS_CONCURRENCY=50 STRESS_DELAY_MS=1 STRESS_EXPECT_MAX_MS=60000 pnpm run test:stress
+```
+
 ---
 
 ## Upgrading to v4.0.0
@@ -169,6 +179,9 @@ pnpm run lint:fix
 # Run tests
 pnpm run test
 
+# Run synthetic stress test for scrapeMany
+pnpm run test:stress
+
 # Run smoke test (live scraping test)
 ALIX_SMOKE=1 pnpm run smoke
 
@@ -183,6 +196,7 @@ node scripts/debug-test.js
 | `pnpm run lint` | Check code quality |
 | `pnpm run lint:fix` | Auto-fix lint errors |
 | `pnpm run test` | Run unit + integration tests |
+| `pnpm run test:stress` | Run synthetic stress test for `scrapeMany` |
 | `pnpm run smoke` | Live scraping test (requires `ALIX_SMOKE=1`) |
 | `node scripts/debug-test.js` | Diagnostic tool with verbose output |
 

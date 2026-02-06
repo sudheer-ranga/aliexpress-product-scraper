@@ -12,6 +12,7 @@ Use this checklist before publishing a new npm version.
 ## 2) Quality gates
 - `pnpm run lint`
 - `pnpm run test`
+- If batch logic changed: `pnpm run test:stress`
 - Optional live check: `ALIX_SMOKE=1 pnpm run smoke`
 
 ## 3) Packaging sanity check

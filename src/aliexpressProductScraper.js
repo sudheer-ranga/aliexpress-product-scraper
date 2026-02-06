@@ -18,6 +18,19 @@ const FAST_MODE_BLOCKED_RESOURCE_TYPES = new Set([
   "stylesheet",
 ]);
 
+const createAbortError = () => {
+  const error = new Error("Scrape aborted");
+  error.name = "AbortError";
+  error.code = "ABORT_ERR";
+  return error;
+};
+
+const throwIfAborted = (signal) => {
+  if (signal?.aborted) {
+    throw createAbortError();
+  }
+};
+
 const AliexpressProductScraper = async (
   idOrUrl,
   {
@@ -27,11 +40,14 @@ const AliexpressProductScraper = async (
     timeout = 60000,
     fastMode = false,
     fields = null,
+    signal = null,
   } = {}
 ) => {
   if (!idOrUrl) {
     throw new Error("Please provide a valid product id");
   }
+
+  throwIfAborted(signal);
 
   const id = normalizeProductId(idOrUrl);
   const selectedFields = normalizeFields(fields);
@@ -47,6 +63,20 @@ const AliexpressProductScraper = async (
   });
 
   let browser;
+  let browserClosed = false;
+  let abortListener;
+  const closeBrowser = async () => {
+    if (!browser || browserClosed) {
+      return;
+    }
+
+    browserClosed = true;
+    try {
+      await browser.close();
+    } catch {
+      // Ignore close errors during abort/cleanup paths
+    }
+  };
 
   try {
     const REVIEWS_COUNT = reviewsCount || 20;
@@ -54,6 +84,15 @@ const AliexpressProductScraper = async (
       headless: true,
       ...(puppeteerOptions || {}),
     });
+
+    if (signal) {
+      abortListener = () => {
+        void closeBrowser();
+      };
+      signal.addEventListener("abort", abortListener, { once: true });
+    }
+
+    throwIfAborted(signal);
     const page = await browser.newPage();
 
     if (fastMode) {
@@ -101,6 +140,7 @@ const AliexpressProductScraper = async (
     const startTime = Date.now();
 
     while (!data && (Date.now() - startTime) < maxWaitTime) {
+      throwIfAborted(signal);
       // First try to get data from intercepted API
       if (apiData) {
         data = extractDataFromApiResponse(apiData);
@@ -160,16 +200,25 @@ const AliexpressProductScraper = async (
       reviewsPromise,
     ]);
 
-    await browser.close();
+    await closeBrowser();
 
     const productJson = buildProductJson({ data, descriptionData, reviews });
     return pickFields(productJson, selectedFields);
   } catch (error) {
-    console.error(error);
-    if (browser) {
-      await browser.close();
+    if (!signal?.aborted) {
+      console.error(error);
     }
+
+    await closeBrowser();
+    if (signal?.aborted && error?.code !== "ABORT_ERR") {
+      throw createAbortError();
+    }
+
     throw error;
+  } finally {
+    if (signal && abortListener) {
+      signal.removeEventListener("abort", abortListener);
+    }
   }
 };
 
