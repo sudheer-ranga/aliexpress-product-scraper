@@ -2,7 +2,8 @@ name: Node.js Package
 
 on:
   release:
-    types: [created]
+    types: [published]
+  workflow_dispatch:
 
 jobs:
   build:
@@ -28,6 +29,17 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Verify release tag matches package version
+        if: github.event_name == 'release'
+        run: |
+          TAG="${GITHUB_REF_NAME#v}"
+          PKG_VERSION="$(node -p "require('./package.json').version")"
+          echo "Release tag: $TAG"
+          echo "Package version: $PKG_VERSION"
+          if [ "$TAG" != "$PKG_VERSION" ]; then
+            echo "Tag/version mismatch. Refuse to publish."
+            exit 1
+          fi
       - uses: pnpm/action-setup@v4
         with:
           version: 10
@@ -42,4 +54,4 @@ jobs:
           HUSKY: 0
       - run: pnpm publish --no-git-checks
         env:
-          NODE_AUTH_TOKEN: ${{secrets.npm_token}}
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN || secrets.npm_token }}

@@ -29,6 +29,12 @@ const data = await scrape('1005007429636284');
 console.log(data.title, data.salePrice);
 ```
 
+You can pass either a product ID or a product URL:
+
+```javascript
+const fromUrl = await scrape('https://www.aliexpress.com/item/1005007429636284.html');
+```
+
 ### Options
 
 | Option | Type | Default | Description |
@@ -37,6 +43,58 @@ console.log(data.title, data.salePrice);
 | `filterReviewsBy` | 'all' \| 1-5 | 'all' | Filter reviews by star rating |
 | `puppeteerOptions` | object | {} | Puppeteer launch options |
 | `timeout` | number | 60000 | Page navigation timeout (ms) |
+| `fastMode` | boolean | false | Skip heavy fields (`description`, `reviews`) and block heavy resources |
+| `fields` | string[] | null | Return only selected top-level fields |
+
+### Fast Mode + Field Selection
+
+```javascript
+const slim = await scrape('1005007429636284', {
+  fastMode: true,
+  fields: ['title', 'productId', 'salePrice', 'shipping', 'ratings'],
+});
+```
+
+### Batch Scraping
+
+```javascript
+import { scrapeMany } from 'aliexpress-product-scraper';
+
+const result = await scrapeMany(
+  [
+    '1005007429636284',
+    'https://www.aliexpress.com/item/1005007429636284.html',
+  ],
+  {
+    concurrency: 3,
+    retries: 1,
+    itemTimeout: 120000,
+    fastMode: true,
+    onProgress: ({ completed, total, succeeded, failed }) => {
+      console.log(`Progress: ${completed}/${total} | ok=${succeeded} fail=${failed}`);
+    },
+  }
+);
+
+console.log(result.summary);
+console.log(result.items[0]);
+```
+
+Batch options:
+- `concurrency` (default `3`): Max parallel scrapes
+- `retries` (default `1`): Retry attempts per item after first failure
+- `itemTimeout` (default `120000`): Timeout per batch item in ms
+- `onProgress`: Callback invoked after each completed item
+
+### Stress Testing `scrapeMany`
+
+```bash
+# Default synthetic stress run (1000 items)
+pnpm run test:stress
+
+# Custom scale knobs
+STRESS_ITEMS=5000 STRESS_CONCURRENCY=50 STRESS_DELAY_MS=1 STRESS_EXPECT_MAX_MS=60000 pnpm run test:stress
+```
 
 ---
 
@@ -121,6 +179,9 @@ pnpm run lint:fix
 # Run tests
 pnpm run test
 
+# Run synthetic stress test for scrapeMany
+pnpm run test:stress
+
 # Run smoke test (live scraping test)
 ALIX_SMOKE=1 pnpm run smoke
 
@@ -135,10 +196,13 @@ node scripts/debug-test.js
 | `pnpm run lint` | Check code quality |
 | `pnpm run lint:fix` | Auto-fix lint errors |
 | `pnpm run test` | Run unit + integration tests |
+| `pnpm run test:stress` | Run synthetic stress test for `scrapeMany` |
 | `pnpm run smoke` | Live scraping test (requires `ALIX_SMOKE=1`) |
 | `node scripts/debug-test.js` | Diagnostic tool with verbose output |
 
 A pre-commit hook automatically runs ESLint on staged files.
+
+Release process checklist: `docs/RELEASE_CHECKLIST.md`
 
 ---
 
