@@ -13,22 +13,22 @@
 ## Remaining milestones
 
 ### Phase 2 (codex/ux-perf) - Non-breaking UX + performance
-Status: [ ]
+Status: [~]
 Deliverables:
-- Accept product URL or product ID (same output)
-- Optional browser injection to reuse a Puppeteer instance
-- fastMode option (skip description/reviews, block heavy resources)
-- Better error taxonomy (invalid ID vs blocked vs timeout)
-- Remove node-fetch (use native fetch in Node 24+)
+- [x] Accept product URL or product ID (same output)
+- [ ] Optional browser injection to reuse a Puppeteer instance
+- [x] fastMode option (skip description/reviews, block heavy resources)
+- [ ] Better error taxonomy (invalid ID vs blocked vs timeout)
+- [ ] Remove node-fetch (use native fetch in Node 24+)
 Notes:
 - All new behavior opt-in; defaults stay the same.
 
 ### Phase 3 (codex/feature/batch) - Batch scraping
-Status: [ ]
+Status: [x]
 Deliverables:
-- scrapeMany(idsOrUrls, options)
-- Concurrency limit, retries, per-item timeouts
-- Progress callback or async iterator
+- [x] scrapeMany(idsOrUrls, options)
+- [x] Concurrency limit, retries, per-item timeouts
+- [x] Progress callback
 Notes:
 - Must not change existing single-item API.
 

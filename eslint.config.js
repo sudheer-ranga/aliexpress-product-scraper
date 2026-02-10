@@ -19,6 +19,8 @@ export default [
         setInterval: "readonly",
         clearTimeout: "readonly",
         clearInterval: "readonly",
+        AbortController: "readonly",
+        AbortSignal: "readonly",
         // Browser globals (for puppeteer evaluate)
         window: "readonly",
         document: "readonly",
