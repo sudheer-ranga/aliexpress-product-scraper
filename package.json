@@ -1,11 +1,19 @@
 {
   "name": "aliexpress-product-scraper",
-  "version": "3.0.0",
+  "version": "4.0.0",
   "description": "Get Aliexpress product details as a json reponse including feedbacks, variants, description, images, etc.,",
   "main": "index.js",
   "type": "module",
+  "files": [
+    "index.js",
+    "src",
+    "README.md",
+    "LICENSE"
+  ],
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "node --test tests/unit/*.test.js tests/integration/*.test.js",
+    "test:unit": "node --test tests/unit/*.test.js",
+    "test:integration": "node --test tests/integration/*.test.js",
     "smoke": "node ./scripts/smoke.js",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
@@ -41,9 +49,9 @@
   },
   "dependencies": {
     "@faker-js/faker": "10.2.0",
-    "cheerio": "1.1.2",
+    "cheerio": "1.2.0",
     "node-fetch": "3.3.2",
-    "puppeteer": "24.34.0",
+    "puppeteer": "24.37.1",
     "puppeteer-extra": "^3.3.6",
     "puppeteer-extra-plugin-stealth": "^2.11.2"
   },
