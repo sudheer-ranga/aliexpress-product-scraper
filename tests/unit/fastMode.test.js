@@ -1,71 +1,146 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { buildProductJson } from "../../src/transform.js";
 
-const minimalData = {
-  productInfoComponent: { subject: "Test Product", categoryId: 1, id: 42 },
+const fakeProductData = {
+  productInfoComponent: { subject: "Test Product", categoryId: 1, id: 123 },
   inventoryComponent: { totalQuantity: 10, totalAvailQuantity: 5 },
-  tradeComponent: { formatTradeCount: "100" },
-  sellerComponent: { storeName: "Test Store", storeLogo: null, companyId: 1, storeNum: 2, topRatedSeller: false, payPalAccount: false },
-  storeFeedbackComponent: { sellerPositiveNum: 50, sellerPositiveRate: "96" },
-  feedbackComponent: { evarageStar: "4.5", totalValidNum: 20, fiveStarNum: 10, fourStarNum: 5, threeStarNum: 3, twoStarNum: 1, oneStarNum: 1 },
-  imageComponent: { imagePathList: [] },
+  tradeComponent: { formatTradeCount: "50" },
+  sellerComponent: { storeName: "Store", storeLogo: "", companyId: 1, storeNum: 1 },
+  storeFeedbackComponent: { sellerPositiveNum: 10, sellerPositiveRate: "95" },
+  feedbackComponent: { evarageStar: "4.5", totalValidNum: 100 },
+  imageComponent: { imagePathList: ["img.jpg"] },
   skuComponent: { productSKUPropertyList: [] },
   priceComponent: { skuPriceList: [], origPrice: {}, discountPrice: {} },
   productPropComponent: { props: [] },
   currencyComponent: {},
   webGeneralFreightCalculateComponent: { originalLayoutResultList: [] },
+  productDescComponent: { descriptionUrl: "https://desc.aliexpress.com/desc.html" },
 };
 
-test("fastMode contract: null description and empty reviews produce valid output", () => {
-  const result = buildProductJson({
-    data: minimalData,
-    descriptionData: null,
-    reviews: [],
+test("fastMode integration", async (t) => {
+  let interceptEnabled = false;
+  const navigatedUrls = [];
+  let fetchCallCount = 0;
+
+  const makePage = () => {
+    return {
+      on: () => {},
+      goto: async (url) => {
+        navigatedUrls.push(url);
+      },
+      evaluate: async () => fakeProductData,
+      setRequestInterception: async (val) => {
+        interceptEnabled = val;
+      },
+      content: async () => "<html><body><p>description</p></body></html>",
+    };
+  };
+
+  t.mock.module("puppeteer-extra", {
+    defaultExport: {
+      use: () => {},
+      launch: async () => ({
+        newPage: async () => makePage(),
+        close: async () => {},
+      }),
+    },
   });
 
-  assert.equal(result.description, null);
-  assert.deepStrictEqual(result.reviews, []);
-  assert.equal(typeof result.quantity, "object");
-  assert.equal(typeof result.storeInfo, "object");
-});
-
-test("fastMode contract: description is null when skipped", () => {
-  const result = buildProductJson({
-    data: minimalData,
-    descriptionData: null,
-    reviews: [],
+  t.mock.module("puppeteer-extra-plugin-stealth", {
+    defaultExport: () => ({}),
   });
 
-  assert.equal(result.description, null);
-});
-
-test("fastMode contract: reviews are empty array when skipped", () => {
-  const result = buildProductJson({
-    data: minimalData,
-    descriptionData: null,
-    reviews: [],
+  t.mock.module("node-fetch", {
+    defaultExport: async () => {
+      fetchCallCount++;
+      return {
+        ok: true,
+        json: async () => ({ data: { evaViewList: [] } }),
+      };
+    },
   });
 
-  assert.ok(Array.isArray(result.reviews));
-  assert.equal(result.reviews.length, 0);
-});
-
-test("fastMode contract: all other product fields still populated", () => {
-  const result = buildProductJson({
-    data: minimalData,
-    descriptionData: null,
-    reviews: [],
+  t.mock.module("cheerio", {
+    namedExports: {
+      load: () => () => ({ html: () => "<p>mocked description</p>" }),
+    },
   });
 
-  assert.equal(result.title, "Test Product");
-  assert.equal(result.productId, 42);
-  assert.equal(typeof result.quantity, "object");
-  assert.ok("total" in result.quantity);
-  assert.ok("available" in result.quantity);
-  assert.equal(typeof result.storeInfo, "object");
-  assert.ok("name" in result.storeInfo);
-  assert.equal(typeof result.ratings, "object");
-  assert.ok(Array.isArray(result.images));
-  assert.ok(Array.isArray(result.specs));
+  const { default: scrape } = await import("../../src/aliexpressProductScraper.js");
+
+  await t.test("fastMode=true: enables request interception", async () => {
+    interceptEnabled = false;
+    navigatedUrls.length = 0;
+    fetchCallCount = 0;
+
+    await scrape("123", { fastMode: true });
+
+    assert.equal(interceptEnabled, true, "should call setRequestInterception(true)");
+  });
+
+  await t.test("fastMode=true: only navigates to product page, NOT description", async () => {
+    interceptEnabled = false;
+    navigatedUrls.length = 0;
+    fetchCallCount = 0;
+
+    await scrape("123", { fastMode: true });
+
+    assert.equal(navigatedUrls.length, 1, "should navigate once (product page only)");
+    assert.ok(navigatedUrls[0].includes("/item/123.html"));
+  });
+
+  await t.test("fastMode=true: does NOT call fetch for reviews", async () => {
+    interceptEnabled = false;
+    navigatedUrls.length = 0;
+    fetchCallCount = 0;
+
+    await scrape("123", { fastMode: true });
+
+    assert.equal(fetchCallCount, 0, "fetch should not be called for reviews");
+  });
+
+  await t.test("fastMode=true: returns null description and empty reviews", async () => {
+    interceptEnabled = false;
+    navigatedUrls.length = 0;
+    fetchCallCount = 0;
+
+    const result = await scrape("123", { fastMode: true });
+
+    assert.equal(result.description, null);
+    assert.deepStrictEqual(result.reviews, []);
+    assert.equal(result.title, "Test Product");
+    assert.equal(result.productId, 123);
+  });
+
+  await t.test("fastMode=false: does NOT enable request interception", async () => {
+    interceptEnabled = false;
+    navigatedUrls.length = 0;
+    fetchCallCount = 0;
+
+    await scrape("456");
+
+    assert.equal(interceptEnabled, false, "should NOT call setRequestInterception");
+  });
+
+  await t.test("fastMode=false: navigates to product AND description pages", async () => {
+    interceptEnabled = false;
+    navigatedUrls.length = 0;
+    fetchCallCount = 0;
+
+    await scrape("456");
+
+    assert.equal(navigatedUrls.length, 2, "should navigate twice (product + description)");
+    assert.ok(navigatedUrls[0].includes("/item/456.html"));
+    assert.ok(navigatedUrls[1].includes("desc.aliexpress.com"));
+  });
+
+  await t.test("fastMode=false: calls fetch for reviews", async () => {
+    interceptEnabled = false;
+    navigatedUrls.length = 0;
+    fetchCallCount = 0;
+
+    await scrape("456");
+
+    assert.ok(fetchCallCount > 0, "fetch should be called for reviews");
+  });
 });
