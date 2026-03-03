@@ -12,7 +12,7 @@ puppeteer.use(StealthPlugin());
 
 const AliexpressProductScraper = async (
   id,
-  { reviewsCount = 20, filterReviewsBy = "all", puppeteerOptions = {}, timeout = 60000 } = {}
+  { reviewsCount = 20, filterReviewsBy = "all", puppeteerOptions = {}, timeout = 60000, fastMode = false } = {}
 ) => {
   if (!id) {
     throw new Error("Please provide a valid product id");
@@ -27,6 +27,19 @@ const AliexpressProductScraper = async (
       ...(puppeteerOptions || {}),
     });
     const page = await browser.newPage();
+
+    // Block heavy resources in fast mode to speed up page load
+    if (fastMode) {
+      await page.setRequestInterception(true);
+      page.on('request', (req) => {
+        const resourceType = req.resourceType();
+        if (['image', 'font', 'stylesheet'].includes(resourceType)) {
+          req.abort();
+        } else {
+          req.continue();
+        }
+      });
+    }
 
     // Set up response interception to capture the product data API
     // AliExpress uses CSR (Client-Side Rendering) and loads data via mtop API
@@ -98,7 +111,7 @@ const AliexpressProductScraper = async (
     /** Scrape the description page for the product using the description url */
     const descriptionUrl = data?.productDescComponent?.descriptionUrl;
     let descriptionDataPromise = null;
-    if (descriptionUrl) {
+    if (!fastMode && descriptionUrl) {
       descriptionDataPromise = page.goto(descriptionUrl).then(async () => {
         const descriptionPageHtml = await page.content();
         const $ = cheerio.load(descriptionPageHtml);
@@ -106,12 +119,14 @@ const AliexpressProductScraper = async (
       });
     }
 
-    const reviewsPromise = GetReviews({
-      productId: id,
-      limit: REVIEWS_COUNT,
-      total: data.feedbackComponent?.totalValidNum || 0,
-      filterReviewsBy,
-    });
+    const reviewsPromise = fastMode
+      ? Promise.resolve([])
+      : GetReviews({
+        productId: id,
+        limit: REVIEWS_COUNT,
+        total: data.feedbackComponent?.totalValidNum || 0,
+        filterReviewsBy,
+      });
 
     const [descriptionData, reviews] = await Promise.all([
       descriptionDataPromise,
