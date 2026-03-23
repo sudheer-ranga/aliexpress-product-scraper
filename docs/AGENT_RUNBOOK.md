@@ -1,5 +1,7 @@
 # Agent Runbook
 
+See also: [CLAUDE.md](../CLAUDE.md) for agent coding guidelines.
+
 ## Setup
 - Use Node 24+ (standardize on 24)
 - Use pnpm
