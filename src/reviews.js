@@ -75,7 +75,8 @@ const get = async ({ productId, total, limit, filterReviewsBy = "all" }) => {
       if (currentPage === 1) {
         // If first page fails, it's likely a critical issue
         throw new Error(
-          `Failed to fetch reviews for product ${productId}: ${error.message}`
+          `Failed to fetch reviews for product ${productId}: ${error.message}`,
+          { cause: error }
         );
       }
       break;
