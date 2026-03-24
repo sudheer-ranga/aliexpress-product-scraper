@@ -5,6 +5,7 @@ import * as cheerio from "cheerio";
 import { get as GetReviews } from "./reviews.js";
 import { parseJsonp, extractDataFromApiResponse } from "./parsers.js";
 import { buildProductJson } from "./transform.js";
+import { parseProductId } from "./parseProductId.js";
 
 // Use stealth plugin to avoid bot detection
 puppeteer.use(StealthPlugin());
@@ -15,8 +16,10 @@ const AliexpressProductScraper = async (
   { reviewsCount = 20, filterReviewsBy = "all", puppeteerOptions = {}, timeout = 60000 } = {}
 ) => {
   if (!id) {
-    throw new Error("Please provide a valid product id");
+    throw new Error("Please provide a valid product ID or AliExpress URL");
   }
+
+  const productId = parseProductId(id);
 
   let browser;
 
@@ -51,7 +54,7 @@ const AliexpressProductScraper = async (
     });
 
     /** Scrape the aliexpress product page for details */
-    await page.goto(`https://www.aliexpress.com/item/${id}.html`, {
+    await page.goto(`https://www.aliexpress.com/item/${productId}.html`, {
       waitUntil: "networkidle2", // Use networkidle2 for CSR pages
       timeout: timeout,
     });
@@ -89,7 +92,7 @@ const AliexpressProductScraper = async (
 
     if (!data) {
       throw new Error(
-        `Failed to extract product data for product ID: ${id}. ` +
+        `Failed to extract product data for product ID: ${productId}. ` +
         `This may indicate: (1) The product ID is invalid, (2) AliExpress page structure has changed, ` +
         `(3) The page didn't load completely, or (4) Anti-bot measures are blocking access.`
       );
@@ -107,7 +110,7 @@ const AliexpressProductScraper = async (
     }
 
     const reviewsPromise = GetReviews({
-      productId: id,
+      productId: productId,
       limit: REVIEWS_COUNT,
       total: data.feedbackComponent?.totalValidNum || 0,
       filterReviewsBy,
