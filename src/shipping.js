@@ -1,11 +1,11 @@
 const getShippingData = (shippingData) => {
-  if (!shippingData || !Array.isArray(shippingData)) {
+  if (!Array.isArray(shippingData)) {
     return [];
   }
 
-  const shippingOptions = shippingData.map((shippingOption) => {
+  return shippingData.map((shippingOption) => {
     const bizData = shippingOption?.bizData || {};
-    
+
     // Handle both old and new API formats
     const {
       // Old format fields
@@ -22,6 +22,7 @@ const getShippingData = (shippingData) => {
       displayAmount,
       displayCurrency,
       warehouseType,
+
       // New format fields
       shipFrom,
       shipFromCode,
@@ -34,17 +35,24 @@ const getShippingData = (shippingData) => {
 
     const hasShippingFee = shippingFee === "charge";
 
+    const parsedFreightCommitDay = Number(freightCommitDay);
+    const validFreightCommitDay = Number.isFinite(parsedFreightCommitDay)
+      ? parsedFreightCommitDay
+      : null;
+
     const returnData = {
       deliveryProviderName: deliveryProviderName || itemScene || null,
       tracking: tracking || null,
       provider: provider || null,
       company: company || null,
+
       deliveryInfo: {
-        min: deliveryDayMin || (freightCommitDay ? parseInt(freightCommitDay) : null),
-        max: deliveryDayMax || (freightCommitDay ? parseInt(freightCommitDay) : null),
+        min: deliveryDayMin ?? validFreightCommitDay,
+        max: deliveryDayMax ?? validFreightCommitDay,
         displayMin: composeEtaMixDate || null,
         displayMax: composeEtaMaxDate || null,
       },
+
       shippingInfo: {
         from: shipFrom || null,
         fromCode: shipFromCode || null,
@@ -53,6 +61,7 @@ const getShippingData = (shippingData) => {
         fees: hasShippingFee ? formattedAmount : 0,
         unreachable: unreachable || false,
       },
+
       warehouseType: warehouseType || null,
     };
 
@@ -63,8 +72,6 @@ const getShippingData = (shippingData) => {
 
     return returnData;
   });
-
-  return shippingOptions;
 };
 
 export { getShippingData as get };
