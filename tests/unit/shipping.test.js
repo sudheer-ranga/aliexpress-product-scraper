@@ -68,3 +68,62 @@ test("getShipping maps paid shipping with display amounts", () => {
   assert.equal(result[0].shippingInfo.displayAmount, "$5.00");
   assert.equal(result[0].shippingInfo.displayCurrency, "USD");
 });
+
+test("getShipping preserves 0 delivery day values", () => {
+  const input = [
+    {
+      bizData: {
+        deliveryDayMin: 0,
+        deliveryDayMax: 0,
+        freightCommitDay: "5",
+      },
+    },
+  ];
+
+  const result = getShipping(input);
+
+  assert.deepStrictEqual(result[0].deliveryInfo, {
+    min: 0,
+    max: 0,
+    displayMin: null,
+    displayMax: null,
+  });
+});
+
+test("getShipping ignores invalid freightCommitDay values", () => {
+  const input = [
+    {
+      bizData: {
+        freightCommitDay: "invalid",
+      },
+    },
+  ];
+
+  const result = getShipping(input);
+
+  assert.deepStrictEqual(result[0].deliveryInfo, {
+    min: null,
+    max: null,
+    displayMin: null,
+    displayMax: null,
+  });
+});
+
+test("getShipping uses freightCommitDay when delivery days are missing", () => {
+  const input = [
+    {
+      bizData: {
+        freightCommitDay: "7",
+      },
+    },
+  ];
+
+  const result = getShipping(input);
+
+  assert.deepStrictEqual(result[0].deliveryInfo, {
+    min: 7,
+    max: 7,
+    displayMin: null,
+    displayMax: null,
+  });
+});
